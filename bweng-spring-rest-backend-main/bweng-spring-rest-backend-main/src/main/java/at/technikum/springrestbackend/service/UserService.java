@@ -22,8 +22,8 @@ public class UserService {
                     UserDto dto = new UserDto();
                     dto.id = user.getId();
                     dto.salutation = user.getSalutation();
-                    dto.first_name = user.getFirst_name();
-                    dto.last_name = user.getLast_name();
+                    dto.first_name = user.getFirstName();
+                    dto.last_name = user.getLastName();
                     dto.email = user.getEmail();
                     dto.username = user.getUsername();
                     return dto;
@@ -37,8 +37,8 @@ public class UserService {
         UserDto dto = new UserDto();
         dto.id = user.getId();
         dto.salutation = user.getSalutation();
-        dto.first_name = user.getFirst_name();
-        dto.last_name = user.getLast_name();
+        dto.first_name = user.getFirstName();
+        dto.last_name = user.getLastName();
         dto.email = user.getEmail();
         dto.username = user.getUsername();
 
