@@ -7,6 +7,7 @@ public enum Salutation {
     MX("Mx.");  // Gender-neutral
 
     private final String displayName;
+
     Salutation(String displayName) {
         this.displayName = displayName;
     }

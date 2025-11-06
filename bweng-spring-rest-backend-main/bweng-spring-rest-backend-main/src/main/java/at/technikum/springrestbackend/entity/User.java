@@ -1,11 +1,26 @@
 package at.technikum.springrestbackend.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
-@Data   // Writing getters/setters could be better to avoid password in toString method
+import java.time.Instant;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        // Still need to check for uniqueness at application level
+        uniqueConstraints = {
+                @UniqueConstraint(name = "unique_users_email", columnNames = "email"),
+                @UniqueConstraint(name = "unique_users_username", columnNames = "username")
+        }
+)
 public class User {
 
     @Id
@@ -46,5 +61,13 @@ public class User {
     // Change to enum?
     private String status;
 
-    // Getter + Setter generated with Lombok @Data annotation
+    // UTC, time-zone independent compared to LocalDateTime
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private Instant createdAt;
+
+    // UTC, time-zone independent compared to LocalDateTime
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 }
