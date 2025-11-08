@@ -1,6 +1,6 @@
 package at.technikum.springrestbackend.service;
 
-import at.technikum.springrestbackend.dto.UserDto;
+import at.technikum.springrestbackend.dto.UserRequestDto;
 import at.technikum.springrestbackend.entity.User;
 import at.technikum.springrestbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +15,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public List<UserDto> getAllUsers() {
+    public List<UserRequestDto> getAllUsers() {
         return userRepository.findAll()
                 .stream()
                 .map(user -> {
-                    UserDto dto = new UserDto();
+                    UserRequestDto dto = new UserRequestDto();
                     dto.id = user.getId();
                     dto.salutation = user.getSalutation();
                     dto.first_name = user.getFirstName();
@@ -30,11 +30,11 @@ public class UserService {
                 }).toList();
     }
 
-    public UserDto getUser(Long id) {
+    public UserRequestDto getUser(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        UserDto dto = new UserDto();
+        UserRequestDto dto = new UserRequestDto();
         dto.id = user.getId();
         dto.salutation = user.getSalutation();
         dto.first_name = user.getFirstName();

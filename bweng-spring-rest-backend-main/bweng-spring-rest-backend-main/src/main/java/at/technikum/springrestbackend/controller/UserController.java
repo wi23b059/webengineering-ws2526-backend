@@ -1,6 +1,6 @@
 package at.technikum.springrestbackend.controller;
 
-import at.technikum.springrestbackend.dto.UserDto;
+import at.technikum.springrestbackend.dto.UserRequestDto;
 import at.technikum.springrestbackend.entity.User;
 import at.technikum.springrestbackend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +20,13 @@ public class UserController {
 
     // GET /api/users
     @GetMapping
-    public List<UserDto> getAllUsers() {
+    public List<UserRequestDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
     // GET /api/users/{id}
     @GetMapping("/{id}")
-    public UserDto getUserById(@PathVariable Long id) {
+    public UserRequestDto getUserById(@PathVariable Long id) {
         return userService.getUser(id);
     }
 
