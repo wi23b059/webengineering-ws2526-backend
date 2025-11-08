@@ -9,12 +9,22 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Represents an application user persisted in the database.
+ * <p>
+ * Each instance corresponds to a record in the {@code users} table.
+ * The class defines personal information (name, contact), authentication data
+ * (username, password), and account state (role, status).
+ * <p>
+ * Additional metadata such as creation and update timestamps are automatically
+ * managed by Hibernate through {@code @CreationTimestamp} and {@code @UpdateTimestamp}.
+ */
+@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
 @Table(
         name = "users",
         // Still need to check for uniqueness at application level
@@ -62,7 +72,9 @@ public class User {
     @Column(name = "role", length = 16, nullable = false)
     private Role role;
 
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 16, nullable = false)
+    private Status status;
 
     // UTC, time-zone independent compared to LocalDateTime
     @CreationTimestamp
