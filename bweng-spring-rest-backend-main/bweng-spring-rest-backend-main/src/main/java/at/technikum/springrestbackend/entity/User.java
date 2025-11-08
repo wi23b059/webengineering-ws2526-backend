@@ -1,11 +1,13 @@
 package at.technikum.springrestbackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -24,8 +26,8 @@ import java.time.Instant;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "salutation", length = 16)
@@ -52,13 +54,14 @@ public class User {
     @Column(name = "username", nullable = false, length = 40)
     private String username;
 
+    @JsonIgnore
     @Column(name = "password", nullable = false)
     private String password;
 
-    // Change to enum?
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", length = 16, nullable = false)
+    private Role role;
 
-    // Change to enum?
     private String status;
 
     // UTC, time-zone independent compared to LocalDateTime
