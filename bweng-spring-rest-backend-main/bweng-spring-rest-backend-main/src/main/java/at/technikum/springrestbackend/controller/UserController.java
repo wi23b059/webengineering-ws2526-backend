@@ -16,7 +16,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // erlaubt Aufrufe vom Frontend
+@CrossOrigin(origins = "*") // Allows requests from frontend
 public class UserController {
 
     private final UserService userService;

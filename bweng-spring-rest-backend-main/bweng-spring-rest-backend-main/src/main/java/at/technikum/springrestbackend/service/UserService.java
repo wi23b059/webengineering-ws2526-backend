@@ -56,7 +56,7 @@ public class UserService {
         existing.setEmail(dto.getEmail());
         existing.setUsername(dto.getUsername());
 
-        // Optional: Passwort aktualisieren, falls dto.getPassword() != null
+        // Optional: Update password, if dto.getPassword() != null
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             existing.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
