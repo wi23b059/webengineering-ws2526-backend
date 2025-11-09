@@ -42,6 +42,29 @@ public class UserService {
         return UserMapper.toResponseDto(saved);
     }
 
+    public UserResponseDto updateUser(UUID id, UserRequestDto dto) {
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Update fields
+        existing.setSalutation(dto.getSalutation());
+        existing.setFirstName(dto.getFirstName());
+        existing.setLastName(dto.getLastName());
+        existing.setAddress(dto.getAddress());
+        existing.setZip(dto.getZip());
+        existing.setCity(dto.getCity());
+        existing.setEmail(dto.getEmail());
+        existing.setUsername(dto.getUsername());
+
+        // Optional: Passwort aktualisieren, falls dto.getPassword() != null
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            existing.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        User updated = userRepository.save(existing);
+        return UserMapper.toResponseDto(updated);
+    }
+
     public void deleteUser(UUID id) {
         userRepository.deleteById(id);
     }
