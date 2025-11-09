@@ -1,6 +1,7 @@
 package at.technikum.springrestbackend.controller;
 
 import at.technikum.springrestbackend.dto.UserRequestDto;
+import at.technikum.springrestbackend.dto.UserResponseDto;
 import at.technikum.springrestbackend.entity.User;
 import at.technikum.springrestbackend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -20,26 +22,26 @@ public class UserController {
 
     // GET /api/users
     @GetMapping
-    public List<UserRequestDto> getAllUsers() {
+    public List<UserResponseDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
     // GET /api/users/{id}
     @GetMapping("/{id}")
-    public UserRequestDto getUserById(@PathVariable Long id) {
+    public UserResponseDto getUserById(@PathVariable UUID id) {
         return userService.getUser(id);
     }
 
     // POST /api/users
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User saved = userService.createUser(user);
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserRequestDto dto) {
+        UserResponseDto saved = userService.createUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     // DELETE /api/users/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }

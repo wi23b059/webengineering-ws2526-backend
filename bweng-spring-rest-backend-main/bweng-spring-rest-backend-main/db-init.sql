@@ -6,8 +6,8 @@ USE `oeffi-db`;
 
 -- Tabelle 'users' erstellen
 CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    salutation VARCHAR(10) NOT NULL,
+    id CHAR(36) PRIMARY KEY,
+    salutation ENUM('MR', 'MS') NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     address VARCHAR(255) NOT NULL,
@@ -16,10 +16,24 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('administrator', 'user') NOT NULL DEFAULT 'user',
-    status ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    role ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
+    status ENUM('ACTIVE', 'INACTIVE', 'BANNED', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- Trigger für automatische User-UUID
+DELIMITER //
+CREATE TRIGGER before_insert_users
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+    IF NEW.id IS NULL OR NEW.id = '' THEN
+        SET NEW.id = UUID();
+    END IF;
+END;
+//
+DELIMITER ;
 
 -- Tabelle 'categories' erstellen
 CREATE TABLE categories (
@@ -42,7 +56,7 @@ CREATE TABLE products (
 -- Tabelle 'orders' erstellen
 CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id CHAR(36) NOT NULL,
     total_price DECIMAL(10, 2) NOT NULL,
     status ENUM('pending', 'completed', 'canceled') NOT NULL DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -66,7 +80,7 @@ CREATE TABLE order_items (
 -- Tabelle 'cart' erstellen
 CREATE TABLE cart (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    user_id CHAR(36) NOT NULL,
     product_id INT NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -104,48 +118,48 @@ CREATE TABLE payment_methods (
 **/
 -- Kategorien einfügen
 INSERT INTO categories (name) VALUES
-('Einzelfahrkarten'),
-('Tageskarten'),
-('Wochenkarten'),
-('Monatskarten'),
-('Jahreskarten'),
-('Senioren & Studenten'),
-('Gruppentickets');
+('Single Tickets'),
+('Day Passes'),
+('Weekly Passes'),
+('Monthly Passes'),
+('Annual Passes'),
+('Seniors & Students'),
+('Group Tickets');
 
 -- Beispiel-Nutzer hinzufügen
 INSERT INTO users (salutation, first_name, last_name, address, zip, city, email, username, password, role, status)
 VALUES
-('Mr.', 'Max', 'Mustermann', 'Musterstraße 1', '10115', 'Berlin', 'max.mustermann@example.com', 'maxm', '$2y$10$examplehash1', 'user', 'active'),
-('Ms.', 'Julia', 'Schmidt', 'Hauptstraße 12', '80331', 'München', 'julia.schmidt@example.com', 'julias', '$2y$10$examplehash2', 'user', 'active'),
-('Mr.', 'Lukas', 'Meier', 'Bahnhofstraße 5', '50667', 'Köln', 'lukas.meier@example.com', 'lukasm', '$2y$10$examplehash3', 'user', 'active'),
-('Ms.', 'Anna', 'Fischer', 'Kirchweg 8', '20095', 'Hamburg', 'anna.fischer@example.com', 'annaf', '$2y$10$examplehash4', 'user', 'active'),
-('Mr.', 'Tom', 'Becker', 'Parkallee 22', '28195', 'Bremen', 'tom.becker@example.com', 'tomb', '$2y$10$examplehash5', 'user', 'active'),
-('Ms.', 'Laura', 'Klein', 'Schulstraße 3', '70173', 'Stuttgart', 'laura.klein@example.com', 'laurak', '$2y$10$examplehash6', 'user', 'active'),
-('Mr.', 'Jan', 'Wagner', 'Marktweg 7', '04109', 'Leipzig', 'jan.wagner@example.com', 'janw', '$2y$10$examplehash7', 'user', 'active');
+('MR', 'Max', 'Mustermann', 'Musterstraße 1', '10115', 'Berlin', 'max.mustermann@example.com', 'maxm', '$2y$10$examplehash1', 'USER', 'ACTIVE'),
+('MS', 'Julia', 'Schmidt', 'Hauptstraße 12', '80331', 'München', 'julia.schmidt@example.com', 'julias', '$2y$10$examplehash2', 'USER', 'ACTIVE'),
+('MR', 'Lukas', 'Meier', 'Bahnhofstraße 5', '50667', 'Köln', 'lukas.meier@example.com', 'lukasm', '$2y$10$examplehash3', 'USER', 'ACTIVE'),
+('MR', 'Anna', 'Fischer', 'Kirchweg 8', '20095', 'Hamburg', 'anna.fischer@example.com', 'annaf', '$2y$10$examplehash4', 'USER', 'ACTIVE'),
+('MR', 'Tom', 'Becker', 'Parkallee 22', '28195', 'Bremen', 'tom.becker@example.com', 'tomb', '$2y$10$examplehash5', 'USER', 'ACTIVE'),
+('MS', 'Laura', 'Klein', 'Schulstraße 3', '70173', 'Stuttgart', 'laura.klein@example.com', 'laurak', '$2y$10$examplehash6', 'USER', 'ACTIVE'),
+('MR', 'Jan', 'Wagner', 'Marktweg 7', '04109', 'Leipzig', 'jan.wagner@example.com', 'janw', '$2y$10$examplehash7', 'USER', 'ACTIVE');
 
 -- Beispiel-Produkte hinzufügen
 -- Beispiel-Tickets einfügen
 INSERT INTO products (name, description, price, rating, image_path, category_id) VALUES
-('Einzelfahrkarte Innenstadt', 'Fahrkarte gültig für eine Fahrt innerhalb der Innenstadtzone.', 2.90, 'Sehr praktisch für kurze Wege', 'einzelfahrt.jpg', 1),
-('Tageskarte Stadtgebiet', 'Unbegrenzte Fahrten innerhalb des Stadtgebiets für einen Tag.', 7.50, 'Ideal für Touristen und Pendler', 'tageskarte.jpg', 2),
-('Wochenkarte Region', 'Gültig für alle öffentlichen Verkehrsmittel in der Region für 7 Tage.', 28.00, 'Perfekt für Berufspendler', 'wochenkarte.jpg', 3),
-('Monatskarte Stadtgebiet', 'Unbegrenzte Fahrten innerhalb des Stadtgebiets für einen Monat.', 85.00, 'Sehr praktisch für Vielnutzer', 'monatskarte.jpg', 4),
-('Jahreskarte Stadt & Region', '365 Tage unbegrenzte Nutzung von allen Verkehrsmitteln in Stadt und Region.', 950.00, 'Optimal für tägliche Pendler', 'jahreskarte.jpg', 5),
-('Senioren-Monatskarte', 'Monatskarte für Senioren mit Ermäßigung, gültig für alle Verkehrsmittel in der Stadt.', 50.00, 'Günstig und flexibel', 'seniorenkarte.jpg', 6),
-('Gruppenticket 5 Personen', 'Fahrkarte gültig für 5 Personen gleichzeitig, ideal für Familien oder Freunde.', 20.00, 'Sehr praktisch für Gruppen', 'gruppenticket.jpg', 7),
-('Abendkarte', 'Unbegrenzte Fahrten nach 18:00 Uhr für das gesamte Stadtgebiet.', 4.50, 'Perfekt für Freizeitaktivitäten', 'abendkarte.jpg', 2),
-('Airport Shuttle Ticket', 'Direktfahrt zum Flughafen, gültig für Hin- und Rückfahrt.', 12.00, 'Schnell und bequem zum Flughafen', 'airport.jpg', 1),
-('Studenten-Monatskarte', 'Ermäßigtes Monatsticket für Studierende, gültig innerhalb des Stadtgebiets.', 40.00, 'Ideal für Studenten', 'studentenkarte.jpg', 6),
-('Wochenendticket Stadt & Region', 'Gültig für unbegrenzte Fahrten am Wochenende innerhalb der Stadt und Region.', 15.00, 'Ideal für Ausflüge am Wochenende', 'wochenendticket.jpg', 3),
-('Einzelfahrkarte Zone 2', 'Fahrkarte gültig für eine Fahrt in Zone 2.', 3.50, 'Praktisch für kurze Strecken außerhalb der Innenstadt', 'einzelfahrt_zone2.jpg', 1),
-('Monatskarte Abo', 'Monatsticket als Abonnement, automatisch erneuerbar.', 80.00, 'Komfortabel für regelmäßige Fahrten', 'monatsabo.jpg', 4),
-('Familien-Tageskarte', 'Gültig für 2 Erwachsene und 2 Kinder, einen Tag lang.', 18.00, 'Perfekt für Familienausflüge', 'familientageskarte.jpg', 7),
-('Nachtfahrkarte', 'Gültig für alle Fahrten zwischen 22:00 und 06:00 Uhr.', 5.00, 'Sicher unterwegs in der Nacht', 'nachtfahrkarte.jpg', 2),
-('Senioren-Einzelfahrkarte', 'Einzelfahrkarte für Senioren, gültig innerhalb der Stadt.', 2.00, 'Günstig für kurze Wege', 'senior_einzelfahrt.jpg', 6),
-('Studenten-Tageskarte', 'Gültig für einen Tag, für Studierende mit Ausweis.', 5.50, 'Flexibel für Uni & Freizeit', 'studententageskarte.jpg', 6),
-('Gruppenticket 10 Personen', 'Fahrkarte gültig für 10 Personen gleichzeitig.', 35.00, 'Super für Vereinsausflüge', 'gruppenticket10.jpg', 7),
-('Airport Express Ticket', 'Direktfahrt zum Flughafen in nur 30 Minuten.', 14.00, 'Schnell und bequem', 'airport_express.jpg', 1),
-('Flex-Ticket 5 Fahrten', 'Ticket für 5 Fahrten innerhalb eines Monats frei wählbar.', 12.50, 'Flexibel und günstig', 'flex5.jpg', 2);
+('Single Ticket City Center', 'Valid for one trip within the city center zone.', 2.90, 'Perfect for short trips', 'einzelfahrt.jpg', 1),
+('Day Pass City Area', 'Unlimited rides throughout the city area for one day.', 7.50, 'Ideal for tourists and commuters', 'tageskarte.jpg', 2),
+('Weekly Pass Region', 'Unlimited use of all public transport in the region for 7 days.', 28.00, 'Great for daily commuters', 'wochenkarte.jpg', 3),
+('Monthly Pass City Area', 'Unlimited rides in the city area for a full month.', 85.00, 'Excellent for frequent travelers', 'monatskarte.jpg', 4),
+('Annual Pass City & Region', 'Unlimited access to all city and regional transport for a full year.', 950.00, 'Perfect for daily commuters', 'jahreskarte.jpg', 5),
+('Senior Monthly Pass', 'Discounted monthly pass for seniors, valid on all city transport.', 50.00, 'Affordable and flexible', 'seniorenkarte.jpg', 6),
+('Group Ticket 5 People', 'Ticket for up to 5 people, ideal for families or friends.', 20.00, 'Convenient for groups', 'gruppenticket.jpg', 7),
+('Evening Pass', 'Unlimited rides after 6:00 PM in the entire city area.', 4.50, 'Great for evening outings', 'abendkarte.jpg', 2),
+('Airport Shuttle Ticket', 'Direct round-trip to the airport.', 12.00, 'Quick and convenient', 'airport.jpg', 1),
+('Student Monthly Pass', 'Discounted monthly pass for students, valid in the city area.', 40.00, 'Perfect for students', 'studentenkarte.jpg', 6),
+('Weekend Ticket City & Region', 'Unlimited rides during the weekend across city and region.', 15.00, 'Ideal for weekend trips', 'wochenendticket.jpg', 3),
+('Single Ticket Zone 2', 'Valid for one trip in Zone 2.', 3.50, 'Convenient for trips outside the city center', 'einzelfahrt_zone2.jpg', 1),
+('Monthly Subscription Pass', 'Automatically renewing monthly ticket for regular travel.', 80.00, 'Comfortable for frequent rides', 'monatsabo.jpg', 4),
+('Family Day Pass', 'Valid for 2 adults and 2 children for one day.', 18.00, 'Perfect for family adventures', 'familientageskarte.jpg', 7),
+('Night Pass', 'Unlimited rides from 10:00 PM to 6:00 AM.', 5.00, 'Safe and convenient at night', 'nachtfahrkarte.jpg', 2),
+('Senior Single Ticket', 'Single ride ticket for seniors, valid in the city.', 2.00, 'Affordable for short trips', 'senior_einzelfahrt.jpg', 6),
+('Student Day Pass', 'One-day ticket for students with valid ID.', 5.50, 'Flexible for school or leisure', 'studententageskarte.jpg', 6),
+('Group Ticket 10 People', 'Ticket valid for up to 10 people at once.', 35.00, 'Great for clubs or large groups', 'gruppenticket10.jpg', 7),
+('Airport Express Ticket', 'Direct ride to the airport in 30 minutes.', 14.00, 'Fast and convenient', 'airport_express.jpg', 1),
+('Flex Ticket 5 Rides', 'Five rides to use anytime within a month.', 12.50, 'Flexible and budget-friendly', 'flex5.jpg', 2);
 
 /**
 -- Beispiel-Gutscheine einfügen
