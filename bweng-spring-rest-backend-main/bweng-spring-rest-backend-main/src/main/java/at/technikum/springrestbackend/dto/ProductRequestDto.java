@@ -8,6 +8,10 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
+/**
+ * Request DTO used to create or update a product.
+ * Contains client-provided data for the {@code Product} entity, including the target category.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,13 +26,16 @@ public class ProductRequestDto {
     @NotBlank(message = "Description is required")
     private String description;
 
-    @NotNull
-    @Positive
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be greater than zero")
     private BigDecimal price;
 
+    @Size(max = 120, message = "Rating must be at most 120 characters")
     private String rating;
 
+    @Size(max = 120, message = "Image path must be at most 120 characters")
     private String imagePath;
 
+    @NotNull(message = "Category id is required")
     private Integer categoryId;
 }

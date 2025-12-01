@@ -35,7 +35,7 @@ public class Product {
     @Column(name = "rating", nullable = true, length = 120)
     private String rating;
 
-    @Column(name = "image_path", nullable = true, length = 60)
+    @Column(name = "image_path", nullable = true, length = 120)
     private String imagePath;
 
     @ManyToOne

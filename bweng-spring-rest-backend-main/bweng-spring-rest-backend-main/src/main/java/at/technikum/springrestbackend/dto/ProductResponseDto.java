@@ -3,6 +3,10 @@ package at.technikum.springrestbackend.dto;
 import lombok.*;
 import java.math.BigDecimal;
 
+/**
+ * Response DTO representing a product returned by the API.
+ * Includes basic product information and the associated category id and name.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
