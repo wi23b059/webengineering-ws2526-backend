@@ -5,6 +5,11 @@ import lombok.*;
 
 import java.util.List;
 
+/**
+ * Entity representing a product category.
+ * A category groups multiple products under a common label and is stored in the {@code categories} table.
+ * It is the parent side of the relationship with {@link Product}.
+ */
 @Entity
 @Getter
 @Setter
