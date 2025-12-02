@@ -5,14 +5,22 @@ import at.technikum.springrestbackend.dto.UserResponseDto;
 import at.technikum.springrestbackend.entity.Role;
 import at.technikum.springrestbackend.entity.Status;
 import at.technikum.springrestbackend.entity.User;
+import at.technikum.springrestbackend.exception.UserNotFoundException;
+import at.technikum.springrestbackend.mapper.CategoryMapper;
 import at.technikum.springrestbackend.mapper.UserMapper;
+import at.technikum.springrestbackend.repository.CategoryRepository;
 import at.technikum.springrestbackend.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Service providing CRUD operations for {@code User} entities.
+ * Uses {@link UserRepository} and {@link UserMapper} to access and expose data.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -20,6 +28,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Returns all users as response DTOs.
+     */
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll()
                 .stream()
@@ -27,24 +38,47 @@ public class UserService {
                 .toList();
     }
 
+    /**
+     * Returns a single user by id.
+     *
+     * @param id the UUID of the user
+     * @return the user as a response DTO
+     * @throws UserNotFoundException if the user does not exist
+     */
     public UserResponseDto getUser(UUID id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
         return UserMapper.toResponseDto(user);
     }
 
+    /**
+     * Creates a new user with encoded password and default role/status.
+     *
+     * @param dto the user creation request
+     * @return the created user as a response DTO
+     */
+    @Transactional
     public UserResponseDto createUser(UserRequestDto dto) {
         User user = UserMapper.toEntity(dto);
-        user.setRole(Role.USER);        // Standard-Rolle
+        user.setRole(Role.USER);        // Standard-Role
         user.setStatus(Status.ACTIVE);  // Standard-Status
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         User saved = userRepository.save(user);
         return UserMapper.toResponseDto(saved);
     }
 
+    /**
+     * Updates an existing user (except username and role).
+     *
+     * @param id  the UUID of the user to update
+     * @param dto the updated values
+     * @return the updated user as a response DTO
+     * @throws UserNotFoundException if the user does not exist
+     */
+    @Transactional
     public UserResponseDto updateUser(UUID id, UserRequestDto dto) {
         User existing = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(id));
 
         // Update fields
         existing.setSalutation(dto.getSalutation());
@@ -54,7 +88,6 @@ public class UserService {
         existing.setZip(dto.getZip());
         existing.setCity(dto.getCity());
         existing.setEmail(dto.getEmail());
-        existing.setUsername(dto.getUsername());
 
         // Optional: Update password, if dto.getPassword() != null
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
@@ -65,7 +98,17 @@ public class UserService {
         return UserMapper.toResponseDto(updated);
     }
 
+    /**
+     * Deletes a user by id.
+     *
+     * @param id the UUID of the user to delete
+     * @throws UserNotFoundException if the user does not exist
+     */
+    @Transactional
     public void deleteUser(UUID id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException(id);
+        }
         userRepository.deleteById(id);
     }
 }

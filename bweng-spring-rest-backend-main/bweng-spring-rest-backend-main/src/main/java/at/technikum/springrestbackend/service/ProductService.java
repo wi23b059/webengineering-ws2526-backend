@@ -6,6 +6,7 @@ import at.technikum.springrestbackend.entity.Category;
 import at.technikum.springrestbackend.entity.Product;
 import at.technikum.springrestbackend.exception.CategoryNotFoundException;
 import at.technikum.springrestbackend.exception.ProductNotFoundException;
+import at.technikum.springrestbackend.mapper.CategoryMapper;
 import at.technikum.springrestbackend.mapper.ProductMapper;
 import at.technikum.springrestbackend.repository.CategoryRepository;
 import at.technikum.springrestbackend.repository.ProductRepository;
@@ -15,6 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Service providing CRUD operations for {@code Product} entities.
+ * Uses {@link ProductRepository} and {@link ProductMapper} to access and expose data.
+ */
 @Service
 @RequiredArgsConstructor
 public class ProductService {
