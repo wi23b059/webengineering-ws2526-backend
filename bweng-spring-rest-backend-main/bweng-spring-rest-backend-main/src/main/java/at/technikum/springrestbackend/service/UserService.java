@@ -5,7 +5,9 @@ import at.technikum.springrestbackend.dto.UserResponseDto;
 import at.technikum.springrestbackend.entity.Role;
 import at.technikum.springrestbackend.entity.Status;
 import at.technikum.springrestbackend.entity.User;
+import at.technikum.springrestbackend.exception.EmailAlreadyExistsException;
 import at.technikum.springrestbackend.exception.UserNotFoundException;
+import at.technikum.springrestbackend.exception.UsernameAlreadyExistsException;
 import at.technikum.springrestbackend.mapper.CategoryMapper;
 import at.technikum.springrestbackend.mapper.UserMapper;
 import at.technikum.springrestbackend.repository.CategoryRepository;
@@ -52,13 +54,26 @@ public class UserService {
     }
 
     /**
-     * Creates a new user with encoded password and default role/status.
+     * Creates a new user with encoded password, default role/status, and validated uniqueness.
      *
      * @param dto the user creation request
      * @return the created user as a response DTO
+     * @throws EmailAlreadyExistsException    if the provided email is already registered
+     * @throws UsernameAlreadyExistsException if the provided username is already taken
      */
     @Transactional
     public UserResponseDto createUser(UserRequestDto dto) {
+
+        // 1. Check email uniqueness
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException(dto.getEmail());
+        }
+
+        // 2. Check username uniqueness
+        if (userRepository.findByUsername(dto.getUsername()).isPresent()) {
+            throw new UsernameAlreadyExistsException(dto.getUsername());
+        }
+
         User user = UserMapper.toEntity(dto);
         user.setRole(Role.USER);        // Standard-Role
         user.setStatus(Status.ACTIVE);  // Standard-Status
@@ -87,7 +102,6 @@ public class UserService {
         existing.setAddress(dto.getAddress());
         existing.setZip(dto.getZip());
         existing.setCity(dto.getCity());
-        existing.setEmail(dto.getEmail());
 
         // Optional: Update password, if dto.getPassword() != null
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
