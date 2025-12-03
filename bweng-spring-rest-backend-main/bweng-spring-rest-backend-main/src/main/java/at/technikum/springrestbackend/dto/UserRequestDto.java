@@ -1,10 +1,7 @@
 package at.technikum.springrestbackend.dto;
 
 import at.technikum.springrestbackend.entity.Salutation;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -32,6 +29,13 @@ public class UserRequestDto {
     @Size(max = 60, message = "Last name cannot exceed 60 characters")
     private String lastName;
 
+    @NotBlank(message = "Country code is required")
+    @Pattern(
+            regexp = "^[A-Z]{2}$",
+            message = "Country code must be a valid alpha-2 code (ex: AT, IT, DE)"
+    )
+    private String countryCode;
+
     @NotBlank(message = "Address is required")
     @Size(max = 120, message = "Address cannot exceed 120 characters")
     private String address;
@@ -54,6 +58,15 @@ public class UserRequestDto {
     private String username;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters long")
+    @Pattern(
+            regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{8,}$",
+            message = "Password must be at least 8 characters long and contain digits, lowercase and uppercase letters"
+    )
     private String password;
+
+    /**
+     * Optional profile picture URL; if null or blank, a default placeholder is used on response.
+     */
+    @Size(max = 255, message = "Profile picture URL cannot exceed 255 characters")
+    private String profilePictureUrl;
 }

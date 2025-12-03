@@ -27,12 +27,14 @@ public class UserResponseDto {
     private String firstName;
     private String lastName;
 
+    private String countryCode;
     private String address;
     private String zip;
     private String city;
 
     private String email;
     private String username;
+    private String profilePictureUrl;
 
     private Role role;
     private Status status;

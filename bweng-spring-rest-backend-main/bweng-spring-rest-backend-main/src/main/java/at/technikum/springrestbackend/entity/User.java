@@ -49,6 +49,9 @@ public class User {
     @Column(name = "last_name", nullable = false, length = 60)
     private String lastName;
 
+    @Column(name = "country_code", length = 2, nullable = false)
+    private String countryCode;
+
     @Column(name = "address", nullable = false, length = 120)
     private String address;
 
@@ -58,15 +61,22 @@ public class User {
     @Column(name = "city", nullable = false, length = 60)
     private String city;
 
-    @Column(name = "email", nullable = false, length = 120)
+    @Column(name = "email", nullable = false, unique = true, length = 120)
     private String email;
 
-    @Column(name = "username", nullable = false, length = 40)
+    @Column(name = "username", nullable = false, unique = true, length = 40)
     private String username;
 
     @JsonIgnore
     @Column(name = "password", nullable = false)
     private String password;
+
+    /**
+     * Optional URL or path to the user's profile picture.
+     * If null, the API should respond with a default placeholder URL.
+     */
+    @Column(name = "profile_picture_url", length = 255)
+    private String profilePictureUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 16, nullable = false)
