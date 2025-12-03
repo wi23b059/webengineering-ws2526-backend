@@ -2,7 +2,6 @@ package at.technikum.springrestbackend.controller;
 
 import at.technikum.springrestbackend.dto.UserRequestDto;
 import at.technikum.springrestbackend.dto.UserResponseDto;
-import at.technikum.springrestbackend.entity.User;
 import at.technikum.springrestbackend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * REST controller exposing CRUD endpoints for users.
+ */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -21,26 +23,47 @@ public class UserController {
 
     private final UserService userService;
 
-    // GET /api/users
+    /**
+     * Returns all users.
+     *
+     * @return a list of user response DTOs
+     */
     @GetMapping
     public List<UserResponseDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    // GET /api/users/{id}
+    /**
+     * Returns a single user identified by its id.
+     *
+     * @param id the UUID of the user to retrieve
+     * @return the user as a response DTO
+     */
     @GetMapping("/{id}")
     public UserResponseDto getUserById(@PathVariable UUID id) {
         return userService.getUser(id);
     }
 
-    // POST /api/users
+    /**
+     * Creates a new user using the provided request data.
+     *
+     * @param dto the user creation request
+     * @return a 201 Created response containing the created user
+     */
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto dto) {
         UserResponseDto saved = userService.createUser(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // PUT /api/users/{id}
+    /**
+     * Updates an existing user identified by its id.
+     * Only the allowed fields are updated in the underlying service.
+     *
+     * @param id  the UUID of the user to update
+     * @param dto the updated values for the user
+     * @return a 200 OK response containing the updated user
+     */
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable UUID id,
@@ -49,7 +72,12 @@ public class UserController {
         return ResponseEntity.ok(updated);
     }
 
-    // DELETE /api/users/{id}
+    /**
+     * Deletes the user with the given id.
+     *
+     * @param id the UUID of the user to delete
+     * @return a 204 No Content response if the deletion is successful
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);

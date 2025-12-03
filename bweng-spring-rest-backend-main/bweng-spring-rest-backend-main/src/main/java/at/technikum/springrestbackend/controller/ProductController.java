@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller exposing CRUD endpoints for products.
+ * Supports optional filtering by category via a query parameter.
+ */
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
@@ -19,26 +23,47 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // GET /api/products
+    /**
+     * Returns all products, optionally filtered by category.
+     *
+     * @param category optional category id used to filter products
+     * @return a list of product response DTOs
+     */
     @GetMapping
     public List<ProductResponseDto> getAllProducts(@RequestParam(required = false) Integer category) {
         return productService.getAllProducts(category);
     }
 
-    // GET /api/products/{id}
+    /**
+     * Returns a single product identified by its id.
+     *
+     * @param id the id of the product to retrieve
+     * @return the product as a response DTO
+     */
     @GetMapping("/{id}")
     public ProductResponseDto getProductById(@PathVariable Integer id) {
         return productService.getProduct(id);
     }
 
-    // POST /api/products
+    /**
+     * Creates a new product using the provided request data.
+     *
+     * @param dto the product creation request
+     * @return a 201 Created response containing the created product
+     */
     @PostMapping
     public ResponseEntity<ProductResponseDto> createProduct(@Valid @RequestBody ProductRequestDto dto) {
         ProductResponseDto saved = productService.createProduct(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // PUT /api/products/{id}
+    /**
+     * Updates an existing product identified by its id.
+     *
+     * @param id  the id of the product to update
+     * @param dto the updated values for the product
+     * @return a 200 OK response containing the updated product
+     */
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponseDto> updateProduct(
             @PathVariable Integer id,
@@ -47,7 +72,12 @@ public class ProductController {
         return ResponseEntity.ok(updated);
     }
 
-    // DELETE /api/products/{id}
+    /**
+     * Deletes the product with the given id.
+     *
+     * @param id the id of the product to delete
+     * @return a 204 No Content response if the deletion is successful
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
         productService.deleteProduct(id);

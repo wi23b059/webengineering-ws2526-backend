@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller exposing CRUD endpoints for categories.
+ */
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
@@ -19,26 +22,46 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    // GET /api/categories
+    /**
+     * Returns all categories.
+     *
+     * @return a list of category response DTOs
+     */
     @GetMapping
     public List<CategoryResponseDto> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
-    // GET /api/categories/{id}
+    /**
+     * Returns a single category identified by its id.
+     *
+     * @param id the id of the category to retrieve
+     * @return the category as a response DTO
+     */
     @GetMapping("/{id}")
     public CategoryResponseDto getCategory(@PathVariable Integer id) {
         return categoryService.getCategory(id);
     }
 
-    // POST /api/categories
+    /**
+     * Creates a new category using the provided request data.
+     *
+     * @param dto the category data sent by the client
+     * @return a 201 Created response containing the created category
+     */
     @PostMapping
     public ResponseEntity<CategoryResponseDto> createCategory(@Valid @RequestBody CategoryRequestDto dto) {
         CategoryResponseDto saved = categoryService.createCategory(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    // PUT /api/categories/{id}
+    /**
+     * Updates an existing category identified by its id.
+     *
+     * @param id  the id of the category to update
+     * @param dto the updated values for the category
+     * @return a 200 OK response containing the updated category
+     */
     @PutMapping("/{id}")
     public ResponseEntity<CategoryResponseDto> updateCategory(
             @PathVariable Integer id,
@@ -47,7 +70,12 @@ public class CategoryController {
         return ResponseEntity.ok(updated);
     }
 
-    // DELETE /api/categories/{id}
+    /**
+     * Deletes the category with the given id.
+     *
+     * @param id the id of the category to delete
+     * @return a 204 No Content response if the deletion is successful
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Integer id) {
         categoryService.deleteCategory(id);
