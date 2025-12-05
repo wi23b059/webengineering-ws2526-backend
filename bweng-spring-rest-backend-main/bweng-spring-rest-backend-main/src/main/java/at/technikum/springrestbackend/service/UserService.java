@@ -14,6 +14,7 @@ import at.technikum.springrestbackend.repository.CategoryRepository;
 import at.technikum.springrestbackend.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -124,5 +125,29 @@ public class UserService {
             throw new UserNotFoundException(id);
         }
         userRepository.deleteById(id);
+    }
+
+    /**
+     * Authenticates a user using email and password.
+     *
+     * @param email the email of the user attempting to log in
+     * @param rawPassword the plaintext password provided by the user
+     * @return the authenticated user as a response DTO
+     * @throws UserNotFoundException if no user with the given email exists
+     * @throws BadCredentialsException if the password is incorrect
+     */
+    public UserResponseDto login(String email, String rawPassword) {
+
+        // 1) Find user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+
+        // 2) Compare passwords
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new BadCredentialsException("Incorrect password");
+        }
+
+        // 3) Convert to response DTO
+        return UserMapper.toResponseDto(user);
     }
 }
