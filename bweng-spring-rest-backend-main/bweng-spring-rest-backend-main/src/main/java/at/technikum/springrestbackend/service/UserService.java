@@ -14,7 +14,11 @@ import at.technikum.springrestbackend.repository.CategoryRepository;
 import at.technikum.springrestbackend.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -30,6 +34,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     /**
      * Returns all users as response DTOs.
@@ -138,16 +143,18 @@ public class UserService {
      */
     public UserResponseDto login(String email, String rawPassword) {
 
-        // 1) Find user by email
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+        // Spring Security authenticate the credentials
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(email, rawPassword)
+        );
 
-        // 2) Compare passwords
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new BadCredentialsException("Incorrect password");
-        }
+        // Authentication succeeded or an exception was thrown
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        // 3) Convert to response DTO
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
+
+        // Convert to response DTO
         return UserMapper.toResponseDto(user);
     }
 }
