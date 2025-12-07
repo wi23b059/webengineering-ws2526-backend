@@ -25,11 +25,13 @@ public class UserMapper {
                 .salutation(dto.getSalutation())
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
+                .countryCode(dto.getCountryCode())
                 .address(dto.getAddress())
                 .zip(dto.getZip())
                 .city(dto.getCity())
                 .email(dto.getEmail())
                 .username(dto.getUsername())
+                .profilePicturePath(dto.getProfilePicturePath())
                 .build();
     }
 
@@ -48,11 +50,13 @@ public class UserMapper {
                 .salutation(user.getSalutation())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .countryCode(user.getCountryCode())
                 .address(user.getAddress())
                 .zip(user.getZip())
                 .city(user.getCity())
                 .email(user.getEmail())
                 .username(user.getUsername())
+                .profilePicturePath((user.getProfilePicturePath()))
                 .role(user.getRole())
                 .status(user.getStatus())
                 .createdAt(user.getCreatedAt())

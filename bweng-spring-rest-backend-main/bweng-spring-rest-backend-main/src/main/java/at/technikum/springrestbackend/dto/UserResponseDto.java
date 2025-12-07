@@ -34,7 +34,7 @@ public class UserResponseDto {
 
     private String email;
     private String username;
-    private String profilePictureUrl;
+    private String profilePicturePath;
 
     private Role role;
     private Status status;

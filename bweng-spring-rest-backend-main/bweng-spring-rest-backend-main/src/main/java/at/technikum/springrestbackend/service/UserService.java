@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -34,7 +35,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
 
     /**
      * Returns all users as response DTOs.
@@ -132,6 +132,16 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
+    /** Suche User nach Username */
+    public Optional<User> findByUsernameOptional(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    /** Suche User nach Email */
+    public Optional<User> findByEmailOptional(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     /**
      * Authenticates a user using email and password.
      *
@@ -142,19 +152,11 @@ public class UserService {
      * @throws BadCredentialsException if the password is incorrect
      */
     public UserResponseDto login(String email, String rawPassword) {
-
-        // Spring Security authenticate the credentials
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, rawPassword)
-        );
-
-        // Authentication succeeded or an exception was thrown
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        User user = userRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
-
-        // Convert to response DTO
-        return UserMapper.toResponseDto(user);
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UserNotFoundException(email));
+            if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+                throw new BadCredentialsException("Invalid password");
+            }
+            return UserMapper.toResponseDto(user);
     }
 }

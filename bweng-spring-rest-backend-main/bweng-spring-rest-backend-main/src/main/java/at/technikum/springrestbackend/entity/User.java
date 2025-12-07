@@ -7,6 +7,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -75,8 +76,8 @@ public class User {
      * Optional URL or path to the user's profile picture.
      * If null, the API should respond with a default placeholder URL.
      */
-    @Column(name = "profile_picture_url", length = 255)
-    private String profilePictureUrl;
+    @Column(name = "profile_picture_path", length = 255)
+    private String profilePicturePath;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 16, nullable = false)
@@ -95,4 +96,9 @@ public class User {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    public User(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
 }

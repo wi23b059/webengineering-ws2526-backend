@@ -10,12 +10,14 @@ CREATE TABLE users (
     salutation ENUM('MR', 'MS') NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
+	country_code VARCHAR(50) NOT NULL,
     address VARCHAR(255) NOT NULL,
     zip VARCHAR(20) NOT NULL,
     city VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
+	profile_picture_path VARCHAR(255) NOT NULL,
     role ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
     status ENUM('ACTIVE', 'INACTIVE', 'BANNED', 'DELETED') NOT NULL DEFAULT 'ACTIVE',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -127,15 +129,15 @@ INSERT INTO categories (name) VALUES
 ('Group Tickets');
 
 -- Beispiel-Nutzer hinzufügen
-INSERT INTO users (salutation, first_name, last_name, address, zip, city, email, username, password, role, status)
+INSERT INTO users (salutation, first_name, last_name, country_code, address, zip, city, email, username, password, profile_picture_path, role, status)
 VALUES
-('MR', 'Max', 'Mustermann', 'Musterstraße 1', '10115', 'Berlin', 'max.mustermann@example.com', 'maxm', '$2y$10$examplehash1', 'USER', 'ACTIVE'),
-('MS', 'Julia', 'Schmidt', 'Hauptstraße 12', '80331', 'München', 'julia.schmidt@example.com', 'julias', '$2y$10$examplehash2', 'USER', 'ACTIVE'),
-('MR', 'Lukas', 'Meier', 'Bahnhofstraße 5', '50667', 'Köln', 'lukas.meier@example.com', 'lukasm', '$2y$10$examplehash3', 'USER', 'ACTIVE'),
-('MR', 'Anna', 'Fischer', 'Kirchweg 8', '20095', 'Hamburg', 'anna.fischer@example.com', 'annaf', '$2y$10$examplehash4', 'USER', 'ACTIVE'),
-('MR', 'Tom', 'Becker', 'Parkallee 22', '28195', 'Bremen', 'tom.becker@example.com', 'tomb', '$2y$10$examplehash5', 'USER', 'ACTIVE'),
-('MS', 'Laura', 'Klein', 'Schulstraße 3', '70173', 'Stuttgart', 'laura.klein@example.com', 'laurak', '$2y$10$examplehash6', 'USER', 'ACTIVE'),
-('MR', 'Jan', 'Wagner', 'Marktweg 7', '04109', 'Leipzig', 'jan.wagner@example.com', 'janw', '$2y$10$examplehash7', 'USER', 'ACTIVE');
+('MR', 'Max', 'Mustermann', 'AT', 'Musterstraße 1', '10115', 'Berlin', 'max.mustermann@example.com', 'maxm', '$2y$10$examplehash1', 'test', 'USER', 'ACTIVE'),
+('MS', 'Julia', 'Schmidt', 'AT', 'Hauptstraße 12', '80331', 'München', 'julia.schmidt@example.com', 'julias', '$2y$10$examplehash2', 'test', 'USER', 'ACTIVE'),
+('MR', 'Lukas', 'Meier', 'AT', 'Bahnhofstraße 5', '50667', 'Köln', 'lukas.meier@example.com', 'lukasm', '$2y$10$examplehash3', 'test', 'USER', 'ACTIVE'),
+('MR', 'Anna', 'Fischer', 'AT', 'Kirchweg 8', '20095', 'Hamburg', 'anna.fischer@example.com', 'annaf', '$2y$10$examplehash4', 'test', 'USER', 'ACTIVE'),
+('MR', 'Tom', 'Becker', 'AT', 'Parkallee 22', '28195', 'Bremen', 'tom.becker@example.com', 'tomb', '$2y$10$examplehash5', 'test', 'USER', 'ACTIVE'),
+('MS', 'Laura', 'Klein', 'AT', 'Schulstraße 3', '70173', 'Stuttgart', 'laura.klein@example.com', 'laurak', '$2y$10$examplehash6', 'test', 'USER', 'ACTIVE'),
+('MR', 'Jan', 'Wagner', 'AT', 'Marktweg 7', '04109', 'Leipzig', 'jan.wagner@example.com', 'janw', '$2y$10$examplehash7', 'test', 'USER', 'ACTIVE');
 
 -- Beispiel-Produkte hinzufügen
 -- Beispiel-Tickets einfügen
