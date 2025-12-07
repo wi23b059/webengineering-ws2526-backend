@@ -141,22 +141,4 @@ public class UserService {
     public Optional<User> findByEmailOptional(String email) {
         return userRepository.findByEmail(email);
     }
-
-    /**
-     * Authenticates a user using email and password.
-     *
-     * @param email the email of the user attempting to log in
-     * @param rawPassword the plaintext password provided by the user
-     * @return the authenticated user as a response DTO
-     * @throws UserNotFoundException if no user with the given email exists
-     * @throws BadCredentialsException if the password is incorrect
-     */
-    public UserResponseDto login(String email, String rawPassword) {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new UserNotFoundException(email));
-            if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-                throw new BadCredentialsException("Invalid password");
-            }
-            return UserMapper.toResponseDto(user);
-    }
 }

@@ -20,7 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * Configures security settings for the application, including authentication handling
+ * Configures security for the application, including JWT-based authentication
  * and password encoding.
  */
 @Configuration
@@ -31,9 +31,9 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     /**
-     * Defines the security filter chain, disabling default authentication mechanisms
-     * and allowing all requests until JWT protection is applied.
-     *+
+     * Defines the security filter chain, adds the JWT authentication filter,
+     * and protects all non-auth endpoints so they require a valid JWT.
+     *
      * @param http the security configuration builder
      * @return the configured security filter chain
      * @throws Exception if the filter chain cannot be built
@@ -43,16 +43,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
-                // this will be needed for JWT later
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(registry -> registry
                         .requestMatchers("/error").permitAll()
-                        .requestMatchers("/auth/token").permitAll()
-                        .requestMatchers("/auth/login").permitAll()
-                        //.anyRequest().authenticated())
-                        // temporarily allow until JWT service user is set up
-                        .anyRequest().permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .anyRequest().authenticated()
                 );
 
         return http.build();
