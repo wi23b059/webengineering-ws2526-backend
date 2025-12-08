@@ -12,6 +12,7 @@ import at.technikum.springrestbackend.repository.CategoryRepository;
 import at.technikum.springrestbackend.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,6 +64,7 @@ public class ProductService {
      * @return the created product as a response DTO
      * @throws CategoryNotFoundException if the provided category id does not exist
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProductResponseDto createProduct(ProductRequestDto dto) {
         Product product = ProductMapper.toEntity(dto);
@@ -84,6 +86,7 @@ public class ProductService {
      * @throws ProductNotFoundException  if no product with the given id exists
      * @throws CategoryNotFoundException if the provided category id does not exist
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProductResponseDto updateProduct(Integer id, ProductRequestDto dto) {
         Product existing = productRepository.findById(id)
@@ -113,6 +116,7 @@ public class ProductService {
      * @param id the id of the product to delete
      * @throws ProductNotFoundException if no product with the given id exists
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteProduct(Integer id) {
         if (!productRepository.existsById(id)) {

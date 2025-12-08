@@ -15,14 +15,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        // Suche zuerst nach Username, dann nach Email
+        // Search first by username, then by email
         User user = userService.findByUsernameOptional(usernameOrEmail)
                 .or(() -> userService.findByEmailOptional(usernameOrEmail))
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found (username or email): " + usernameOrEmail)
                 );
 
-        // UserPrincipal erwartet UUID, username, password und Role
+        // UserPrincipal expects UUID, username, password and Role
         return new UserPrincipal(
                 user.getId(),
                 user.getUsername(),

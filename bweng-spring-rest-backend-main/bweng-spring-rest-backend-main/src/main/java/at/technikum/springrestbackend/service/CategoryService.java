@@ -8,6 +8,7 @@ import at.technikum.springrestbackend.mapper.CategoryMapper;
 import at.technikum.springrestbackend.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,6 +51,7 @@ public class CategoryService {
      * @param dto the category creation request
      * @return the created category as a response DTO
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public CategoryResponseDto createCategory(CategoryRequestDto dto) {
         Category category = CategoryMapper.toEntity(dto);
@@ -65,6 +67,7 @@ public class CategoryService {
      * @return the updated category as a response DTO
      * @throws CategoryNotFoundException if no category with the given id exists
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public CategoryResponseDto updateCategory(Integer id, CategoryRequestDto dto) {
         Category existing = categoryRepository.findById(id)
@@ -82,6 +85,7 @@ public class CategoryService {
      * @param id the id of the category to delete
      * @throws CategoryNotFoundException if no category with the given id exists
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteCategory(Integer id) {
         if (!categoryRepository.existsById(id)) {

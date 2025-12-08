@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
  * REST controller exposing CRUD endpoints for products.
  * Supports optional filtering by category via a query parameter.
  */
+@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor

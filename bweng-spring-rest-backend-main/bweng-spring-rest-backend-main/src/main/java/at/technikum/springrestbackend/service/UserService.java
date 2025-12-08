@@ -14,6 +14,7 @@ import at.technikum.springrestbackend.repository.CategoryRepository;
 import at.technikum.springrestbackend.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,6 +40,7 @@ public class UserService {
     /**
      * Returns all users as response DTOs.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll()
                 .stream()
@@ -53,6 +55,7 @@ public class UserService {
      * @return the user as a response DTO
      * @throws UserNotFoundException if the user does not exist
      */
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public UserResponseDto getUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
@@ -67,6 +70,7 @@ public class UserService {
      * @throws EmailAlreadyExistsException    if the provided email is already registered
      * @throws UsernameAlreadyExistsException if the provided username is already taken
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public UserResponseDto createUser(UserRequestDto dto) {
 
@@ -96,6 +100,7 @@ public class UserService {
      * @return the updated user as a response DTO
      * @throws UserNotFoundException if the user does not exist
      */
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @Transactional
     public UserResponseDto updateUser(UUID id, UserRequestDto dto) {
         User existing = userRepository.findById(id)
@@ -124,6 +129,7 @@ public class UserService {
      * @param id the UUID of the user to delete
      * @throws UserNotFoundException if the user does not exist
      */
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @Transactional
     public void deleteUser(UUID id) {
         if (!userRepository.existsById(id)) {
@@ -133,11 +139,13 @@ public class UserService {
     }
 
     /** Suche User nach Username */
+    @PreAuthorize("hasRole('ADMIN')")
     public Optional<User> findByUsernameOptional(String username) {
         return userRepository.findByUsername(username);
     }
 
     /** Suche User nach Email */
+    @PreAuthorize("hasRole('ADMIN')")
     public Optional<User> findByEmailOptional(String email) {
         return userRepository.findByEmail(email);
     }

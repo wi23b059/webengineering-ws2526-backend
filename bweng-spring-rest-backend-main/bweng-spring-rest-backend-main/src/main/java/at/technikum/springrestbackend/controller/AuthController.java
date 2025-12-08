@@ -5,11 +5,13 @@ import at.technikum.springrestbackend.dto.TokenResponseDto;
 import at.technikum.springrestbackend.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
  * REST controller for authentication endpoints.
  */
+@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
