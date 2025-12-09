@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles cases where the provided email does not match any existing user.
+     * Handles cases where the provided username does not match any existing user.
      * <p>
      * Returns: 404 Not Found
      */
