@@ -11,6 +11,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Security representation of an authenticated user.
+ * <p>
+ * Implements Spring Security's UserDetails interface and provides
+ * the user's ID, username, password and role for authentication and
+ * authorization purposes.
+ */
 @Getter
 public class UserPrincipal implements UserDetails {
     private final UUID id;
@@ -25,9 +32,12 @@ public class UserPrincipal implements UserDetails {
         this.role = role;
     }
 
+    /**
+     * Returns the authorities granted to the user.
+     * Converts the user's Role enum into Spring's "ROLE_*" format.
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Falls Role ein Enum ist, z.B. Role.USER -> ROLE_USER
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
 

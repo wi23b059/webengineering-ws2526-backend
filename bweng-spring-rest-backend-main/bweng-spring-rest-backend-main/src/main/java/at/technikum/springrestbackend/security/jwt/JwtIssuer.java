@@ -10,6 +10,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+/**
+ * Generates signed JWT tokens for authenticated users.
+ * <p>
+ * Builds a token containing the user's ID, username, and role,
+ * sets an expiration time, and signs it using the application's
+ * configured secret key.
+ */
 @Component
 public class JwtIssuer implements TokenIssuer {
     private final JwtProperties jwtProperties;
@@ -18,6 +25,14 @@ public class JwtIssuer implements TokenIssuer {
         this.jwtProperties = jwtProperties;
     }
 
+    /**
+     * Issues a new JWT for the given user.
+     *
+     * @param userId the user's UUID
+     * @param username the user's username
+     * @param role the user's role
+     * @return a signed JWT token as a string
+     */
     @Override
     public String issue(UUID userId, String username, Role role) {
         return JWT.create()

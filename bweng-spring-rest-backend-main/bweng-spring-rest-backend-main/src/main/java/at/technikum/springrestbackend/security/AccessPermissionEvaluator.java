@@ -9,6 +9,13 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Central permission evaluator for method-level security.
+ * <p>
+ * Delegates permission checks to all registered {@link AccessPermission}
+ * implementations. Used by Spring Security when evaluating expressions such as
+ * {@code @PreAuthorize("hasPermission(... )")}.
+ */
 @Component
 @RequiredArgsConstructor
 public class AccessPermissionEvaluator implements PermissionEvaluator {
@@ -19,6 +26,16 @@ public class AccessPermissionEvaluator implements PermissionEvaluator {
         return false;
     }
 
+    /**
+     * Checks whether the authenticated user has permission to access the target
+     * resource identified by its ID and type.
+     *
+     * @param authentication the current authenticated user
+     * @param targetId the ID of the resource
+     * @param targetType the class name of the resource
+     * @param permission unused in this implementation
+     * @return true if any AccessPermission implementation grants access
+     */
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
         boolean hasPermission = false;
