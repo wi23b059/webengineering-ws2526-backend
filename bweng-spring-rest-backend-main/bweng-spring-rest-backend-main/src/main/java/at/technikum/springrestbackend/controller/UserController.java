@@ -2,12 +2,17 @@ package at.technikum.springrestbackend.controller;
 
 import at.technikum.springrestbackend.dto.UserRequestDto;
 import at.technikum.springrestbackend.dto.UserResponseDto;
+import at.technikum.springrestbackend.dto.UserUpdateRequestDto;
+import at.technikum.springrestbackend.entity.User;
+import at.technikum.springrestbackend.exception.UserNotFoundException;
+import at.technikum.springrestbackend.mapper.UserMapper;
 import at.technikum.springrestbackend.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,7 +21,7 @@ import java.util.UUID;
 /**
  * REST controller exposing CRUD endpoints for users.
  */
-@PreAuthorize("isAuthenticated()")
+//@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -45,6 +50,20 @@ public class UserController {
     public UserResponseDto getUserById(@PathVariable UUID id) {
         return userService.getUser(id);
     }
+    /**
+     * Returns the currently authenticated user's details.
+     *
+     * @param authentication the authentication object containing user details
+     * @return the authenticated user as a response DTO
+     */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
+    public UserResponseDto getMe(Authentication authentication) {
+        String username = authentication.getName();
+        return  userService.findByUsernameOptional(username)
+                .map(UserMapper::toResponseDto)
+                .orElseThrow(() -> new UserNotFoundException(username));
+    }
 
     /**
      * Creates a new user using the provided request data.
@@ -69,7 +88,7 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable UUID id,
-            @Valid @RequestBody UserRequestDto dto) {
+            @Valid @RequestBody UserUpdateRequestDto dto) {
         UserResponseDto updated = userService.updateUser(id, dto);
         return ResponseEntity.ok(updated);
     }

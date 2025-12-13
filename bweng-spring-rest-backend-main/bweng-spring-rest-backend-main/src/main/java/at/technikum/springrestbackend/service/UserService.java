@@ -2,6 +2,7 @@ package at.technikum.springrestbackend.service;
 
 import at.technikum.springrestbackend.dto.UserRequestDto;
 import at.technikum.springrestbackend.dto.UserResponseDto;
+import at.technikum.springrestbackend.dto.UserUpdateRequestDto;
 import at.technikum.springrestbackend.entity.Role;
 import at.technikum.springrestbackend.entity.Status;
 import at.technikum.springrestbackend.entity.User;
@@ -70,7 +71,7 @@ public class UserService {
      * @throws EmailAlreadyExistsException    if the provided email is already registered
      * @throws UsernameAlreadyExistsException if the provided username is already taken
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public UserResponseDto createUser(UserRequestDto dto) {
 
@@ -102,7 +103,7 @@ public class UserService {
      */
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     @Transactional
-    public UserResponseDto updateUser(UUID id, UserRequestDto dto) {
+    public UserResponseDto updateUser(UUID id, UserUpdateRequestDto dto) {
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
@@ -110,6 +111,7 @@ public class UserService {
         existing.setSalutation(dto.getSalutation());
         existing.setFirstName(dto.getFirstName());
         existing.setLastName(dto.getLastName());
+        existing.setCountryCode(dto.getCountryCode());
         existing.setAddress(dto.getAddress());
         existing.setZip(dto.getZip());
         existing.setCity(dto.getCity());
@@ -139,13 +141,13 @@ public class UserService {
     }
 
     /** Suche User nach Username */
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public Optional<User> findByUsernameOptional(String username) {
         return userRepository.findByUsername(username);
     }
 
     /** Suche User nach Email */
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public Optional<User> findByEmailOptional(String email) {
         return userRepository.findByEmail(email);
     }

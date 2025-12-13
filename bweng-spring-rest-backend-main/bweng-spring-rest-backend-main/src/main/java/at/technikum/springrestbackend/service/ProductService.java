@@ -116,7 +116,7 @@ public class ProductService {
      * @param id the id of the product to delete
      * @throws ProductNotFoundException if no product with the given id exists
      */
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteProduct(Integer id) {
         if (!productRepository.existsById(id)) {

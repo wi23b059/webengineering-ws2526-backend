@@ -20,7 +20,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class UserResponseDto {
-
     private UUID id;
 
     private Salutation salutation;
@@ -38,6 +37,7 @@ public class UserResponseDto {
 
     private Role role;
     private Status status;
+
 
     private Instant createdAt;
     private Instant updatedAt;
