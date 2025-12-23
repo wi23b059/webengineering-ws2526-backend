@@ -26,7 +26,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             CategoryNotFoundException.class,
             ProductNotFoundException.class,
-            UserNotFoundException.class
+            UserNotFoundException.class,
+            OrderItemNotFoundException.class
     })
     public ResponseEntity<Map<String, String>> handleNotFound(RuntimeException ex) {
         Map<String, String> body = new HashMap<>();
