@@ -16,7 +16,7 @@ import java.util.List;
  * <p>
  * Provides endpoints to view, add, update and remove items in a user's cart.
  */
-@PreAuthorize("isAuthenticated()")
+//@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor

@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * REST controller exposing CRUD endpoints for categories.
  */
-@PreAuthorize("isAuthenticated()")
+//@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor

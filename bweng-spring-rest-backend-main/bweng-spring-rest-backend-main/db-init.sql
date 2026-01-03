@@ -7,7 +7,7 @@ USE `oeffi-db`;
 -- Tabelle 'users' erstellen
 CREATE TABLE users (
     id CHAR(36) PRIMARY KEY,
-    salutation ENUM('MR', 'MS') NOT NULL,
+    salutation ENUM('MR', 'MS', 'MRS', 'MX') NOT NULL,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
 	country_code VARCHAR(50) NOT NULL,
@@ -131,38 +131,38 @@ INSERT INTO categories (name) VALUES
 -- Beispiel-Nutzer hinzufügen
 INSERT INTO users (salutation, first_name, last_name, country_code, address, zip, city, email, username, password, profile_picture_path, role, status)
 VALUES
-('MR', 'Max', 'Mustermann', 'AT', 'Musterstraße 1', '10115', 'Berlin', 'max.mustermann@example.com', 'maxm', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_1', 'USER', 'ACTIVE'),
-('MS', 'Julia', 'Schmidt', 'AT', 'Hauptstraße 12', '80331', 'München', 'julia.schmidt@example.com', 'julias', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_2', 'USER', 'ACTIVE'),
-('MR', 'Lukas', 'Meier', 'AT', 'Bahnhofstraße 5', '50667', 'Köln', 'lukas.meier@example.com', 'lukasm', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_3', 'USER', 'ACTIVE'),
-('MR', 'Anna', 'Fischer', 'AT', 'Kirchweg 8', '20095', 'Hamburg', 'anna.fischer@example.com', 'annaf', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_4', 'USER', 'ACTIVE'),
-('MR', 'Tom', 'Becker', 'AT', 'Parkallee 22', '28195', 'Bremen', 'tom.becker@example.com', 'tomb', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_1', 'USER', 'ACTIVE'),
-('MS', 'Laura', 'Klein', 'AT', 'Schulstraße 3', '70173', 'Stuttgart', 'laura.klein@example.com', 'laurak', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_2', 'USER', 'ACTIVE'),
-('MR', 'Jan', 'Wagner', 'AT', 'Marktweg 7', '04109', 'Leipzig', 'jan.wagner@example.com', 'janw', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_3', 'USER', 'ACTIVE'),
-('MR', 'Admin', 'Administrator', 'AT', 'Höchstädtplatz 1', '1200', 'Wien', 'admin.administrator@oeffi.at', 'admin', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_4', 'ADMIN', 'ACTIVE');
+('MR', 'Max', 'Mustermann', 'AT', 'Musterstraße 1', '10115', 'Berlin', 'max.mustermann@example.com', 'maxm', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_1.png', 'USER', 'ACTIVE'),
+('MS', 'Julia', 'Schmidt', 'AT', 'Hauptstraße 12', '80331', 'München', 'julia.schmidt@example.com', 'julias', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_2.png', 'USER', 'ACTIVE'),
+('MR', 'Lukas', 'Meier', 'AT', 'Bahnhofstraße 5', '50667', 'Köln', 'lukas.meier@example.com', 'lukasm', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_3.png', 'USER', 'ACTIVE'),
+('MR', 'Anna', 'Fischer', 'AT', 'Kirchweg 8', '20095', 'Hamburg', 'anna.fischer@example.com', 'annaf', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_4.png', 'USER', 'ACTIVE'),
+('MR', 'Tom', 'Becker', 'AT', 'Parkallee 22', '28195', 'Bremen', 'tom.becker@example.com', 'tomb', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_1.png', 'USER', 'ACTIVE'),
+('MS', 'Laura', 'Klein', 'AT', 'Schulstraße 3', '70173', 'Stuttgart', 'laura.klein@example.com', 'laurak', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_2.png', 'USER', 'ACTIVE'),
+('MR', 'Jan', 'Wagner', 'AT', 'Marktweg 7', '04109', 'Leipzig', 'jan.wagner@example.com', 'janw', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_3.png', 'USER', 'ACTIVE'),
+('MR', 'Admin', 'Administrator', 'AT', 'Höchstädtplatz 1', '1200', 'Wien', 'admin.administrator@oeffi.at', 'admin', '$2a$10$bEquV67MRaMDsSzaUZ8cFe8v9AXLP9IlPgqW9LS3qhdwhsWlAVicm', 'test_4.png', 'ADMIN', 'ACTIVE');
 
 -- Beispiel-Produkte hinzufügen
 -- Beispiel-Tickets einfügen
 INSERT INTO products (name, description, price, rating, image_path, category_id) VALUES
-('Single Ticket City Center', 'Valid for one trip within the city center zone.', 2.90, 'Perfect for short trips', 'einzelfahrt.jpg', 1),
-('Day Pass City Area', 'Unlimited rides throughout the city area for one day.', 7.50, 'Ideal for tourists and commuters', 'tageskarte.jpg', 2),
-('Weekly Pass Region', 'Unlimited use of all public transport in the region for 7 days.', 28.00, 'Great for daily commuters', 'wochenkarte.jpg', 3),
-('Monthly Pass City Area', 'Unlimited rides in the city area for a full month.', 85.00, 'Excellent for frequent travelers', 'monatskarte.jpg', 4),
-('Annual Pass City & Region', 'Unlimited access to all city and regional transport for a full year.', 950.00, 'Perfect for daily commuters', 'jahreskarte.jpg', 5),
-('Senior Monthly Pass', 'Discounted monthly pass for seniors, valid on all city transport.', 50.00, 'Affordable and flexible', 'seniorenkarte.jpg', 6),
-('Group Ticket 5 People', 'Ticket for up to 5 people, ideal for families or friends.', 20.00, 'Convenient for groups', 'gruppenticket.jpg', 7),
-('Evening Pass', 'Unlimited rides after 6:00 PM in the entire city area.', 4.50, 'Great for evening outings', 'abendkarte.jpg', 2),
-('Airport Shuttle Ticket', 'Direct round-trip to the airport.', 12.00, 'Quick and convenient', 'airport.jpg', 1),
-('Student Monthly Pass', 'Discounted monthly pass for students, valid in the city area.', 40.00, 'Perfect for students', 'studentenkarte.jpg', 6),
-('Weekend Ticket City & Region', 'Unlimited rides during the weekend across city and region.', 15.00, 'Ideal for weekend trips', 'wochenendticket.jpg', 3),
-('Single Ticket Zone 2', 'Valid for one trip in Zone 2.', 3.50, 'Convenient for trips outside the city center', 'einzelfahrt_zone2.jpg', 1),
-('Monthly Subscription Pass', 'Automatically renewing monthly ticket for regular travel.', 80.00, 'Comfortable for frequent rides', 'monatsabo.jpg', 4),
-('Family Day Pass', 'Valid for 2 adults and 2 children for one day.', 18.00, 'Perfect for family adventures', 'familientageskarte.jpg', 7),
-('Night Pass', 'Unlimited rides from 10:00 PM to 6:00 AM.', 5.00, 'Safe and convenient at night', 'nachtfahrkarte.jpg', 2),
-('Senior Single Ticket', 'Single ride ticket for seniors, valid in the city.', 2.00, 'Affordable for short trips', 'senior_einzelfahrt.jpg', 6),
-('Student Day Pass', 'One-day ticket for students with valid ID.', 5.50, 'Flexible for school or leisure', 'studententageskarte.jpg', 6),
-('Group Ticket 10 People', 'Ticket valid for up to 10 people at once.', 35.00, 'Great for clubs or large groups', 'gruppenticket10.jpg', 7),
-('Airport Express Ticket', 'Direct ride to the airport in 30 minutes.', 14.00, 'Fast and convenient', 'airport_express.jpg', 1),
-('Flex Ticket 5 Rides', 'Five rides to use anytime within a month.', 12.50, 'Flexible and budget-friendly', 'flex5.jpg', 2);
+('Single Ticket City Center', 'Valid for one trip within the city center zone.', 2.90, 'Perfect for short trips', 'tram_1.png', 1),
+('Day Pass City Area', 'Unlimited rides throughout the city area for one day.', 7.50, 'Ideal for tourists and commuters', 'tram_2.png', 2),
+('Weekly Pass Region', 'Unlimited use of all public transport in the region for 7 days.', 28.00, 'Great for daily commuters', 'tram_1.png', 3),
+('Monthly Pass City Area', 'Unlimited rides in the city area for a full month.', 85.00, 'Excellent for frequent travelers', 'tram_2.png', 4),
+('Annual Pass City & Region', 'Unlimited access to all city and regional transport for a full year.', 950.00, 'Perfect for daily commuters', 'tram_1.png', 5),
+('Senior Monthly Pass', 'Discounted monthly pass for seniors, valid on all city transport.', 50.00, 'Affordable and flexible', 'tram_2.png', 6),
+('Group Ticket 5 People', 'Ticket for up to 5 people, ideal for families or friends.', 20.00, 'Convenient for groups', 'tram_1.png', 7),
+('Evening Pass', 'Unlimited rides after 6:00 PM in the entire city area.', 4.50, 'Great for evening outings', 'tram_2.png', 2),
+('Airport Shuttle Ticket', 'Direct round-trip to the airport.', 12.00, 'Quick and convenient', 'tram_1.png', 1),
+('Student Monthly Pass', 'Discounted monthly pass for students, valid in the city area.', 40.00, 'Perfect for students', 'tram_2.png', 6),
+('Weekend Ticket City & Region', 'Unlimited rides during the weekend across city and region.', 15.00, 'Ideal for weekend trips', 'tram_1.png', 3),
+('Single Ticket Zone 2', 'Valid for one trip in Zone 2.', 3.50, 'Convenient for trips outside the city center', 'tram_2.png', 1),
+('Monthly Subscription Pass', 'Automatically renewing monthly ticket for regular travel.', 80.00, 'Comfortable for frequent rides', 'tram_1.png', 4),
+('Family Day Pass', 'Valid for 2 adults and 2 children for one day.', 18.00, 'Perfect for family adventures', 'tram_2.png', 7),
+('Night Pass', 'Unlimited rides from 10:00 PM to 6:00 AM.', 5.00, 'Safe and convenient at night', 'tram_1.png', 2),
+('Senior Single Ticket', 'Single ride ticket for seniors, valid in the city.', 2.00, 'Affordable for short trips', 'tram_2.png', 6),
+('Student Day Pass', 'One-day ticket for students with valid ID.', 5.50, 'Flexible for school or leisure', 'tram_1.png', 6),
+('Group Ticket 10 People', 'Ticket valid for up to 10 people at once.', 35.00, 'Great for clubs or large groups', 'tram_2.png', 7),
+('Airport Express Ticket', 'Direct ride to the airport in 30 minutes.', 14.00, 'Fast and convenient', 'tram_1.png', 1),
+('Flex Ticket 5 Rides', 'Five rides to use anytime within a month.', 12.50, 'Flexible and budget-friendly', 'tram_2.png', 2);
 
 /**
 -- Beispiel-Gutscheine einfügen
