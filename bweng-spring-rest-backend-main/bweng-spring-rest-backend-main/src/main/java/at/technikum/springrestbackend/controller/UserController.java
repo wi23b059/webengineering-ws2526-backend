@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.controller;
 
+import at.technikum.springrestbackend.dto.UserAdminUpdateRequestDto;
 import at.technikum.springrestbackend.dto.UserRequestDto;
 import at.technikum.springrestbackend.dto.UserResponseDto;
 import at.technikum.springrestbackend.dto.UserUpdateRequestDto;
@@ -90,6 +91,14 @@ public class UserController {
             @PathVariable UUID id,
             @Valid @RequestBody UserUpdateRequestDto dto) {
         UserResponseDto updated = userService.updateUser(id, dto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/admin/{id}")
+    public ResponseEntity<UserResponseDto> updateAdminUser(
+            @PathVariable UUID id,
+            @Valid @RequestBody UserAdminUpdateRequestDto dto) {
+        UserResponseDto updated = userService.updateAdminUser(id, dto);
         return ResponseEntity.ok(updated);
     }
 

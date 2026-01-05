@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.service;
 
+import at.technikum.springrestbackend.dto.UserAdminUpdateRequestDto;
 import at.technikum.springrestbackend.dto.UserRequestDto;
 import at.technikum.springrestbackend.dto.UserResponseDto;
 import at.technikum.springrestbackend.dto.UserUpdateRequestDto;
@@ -115,6 +116,34 @@ public class UserService {
         existing.setAddress(dto.getAddress());
         existing.setZip(dto.getZip());
         existing.setCity(dto.getCity());
+
+        // Optional: Update password, if dto.getPassword() != null
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            existing.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        User updated = userRepository.save(existing);
+        return UserMapper.toResponseDto(updated);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @Transactional
+    public UserResponseDto updateAdminUser(UUID id, UserAdminUpdateRequestDto dto) {
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        // Update fields
+        existing.setSalutation(dto.getSalutation());
+        existing.setFirstName(dto.getFirstName());
+        existing.setLastName(dto.getLastName());
+        existing.setCountryCode(dto.getCountryCode());
+        existing.setAddress(dto.getAddress());
+        existing.setZip(dto.getZip());
+        existing.setCity(dto.getCity());
+        existing.setEmail(dto.getEmail());
+        existing.setUsername(dto.getUsername());
+        existing.setRole(dto.getRole());
+        existing.setStatus(dto.getStatus());
 
         // Optional: Update password, if dto.getPassword() != null
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
