@@ -10,18 +10,11 @@ import at.technikum.springrestbackend.entity.User;
 import at.technikum.springrestbackend.exception.EmailAlreadyExistsException;
 import at.technikum.springrestbackend.exception.UserNotFoundException;
 import at.technikum.springrestbackend.exception.UsernameAlreadyExistsException;
-import at.technikum.springrestbackend.mapper.CategoryMapper;
 import at.technikum.springrestbackend.mapper.UserMapper;
-import at.technikum.springrestbackend.repository.CategoryRepository;
 import at.technikum.springrestbackend.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -116,6 +109,7 @@ public class UserService {
         existing.setAddress(dto.getAddress());
         existing.setZip(dto.getZip());
         existing.setCity(dto.getCity());
+        existing.setProfilePicturePath(dto.getProfilePicturePath());
 
         // Optional: Update password, if dto.getPassword() != null
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
@@ -144,6 +138,7 @@ public class UserService {
         existing.setUsername(dto.getUsername());
         existing.setRole(dto.getRole());
         existing.setStatus(dto.getStatus());
+        existing.setProfilePicturePath(dto.getProfilePicturePath());
 
         // Optional: Update password, if dto.getPassword() != null
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {

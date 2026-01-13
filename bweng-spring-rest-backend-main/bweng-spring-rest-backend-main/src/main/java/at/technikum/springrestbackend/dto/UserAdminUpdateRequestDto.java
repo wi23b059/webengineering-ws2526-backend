@@ -68,4 +68,10 @@ public class UserAdminUpdateRequestDto {
 
 
     private Status status;
+
+    /**
+     * Optional profile picture URL; if null or blank, a default placeholder is used on response.
+     */
+    @Size(max = 255, message = "Profile picture URL cannot exceed 255 characters")
+    private String profilePicturePath;
 }
