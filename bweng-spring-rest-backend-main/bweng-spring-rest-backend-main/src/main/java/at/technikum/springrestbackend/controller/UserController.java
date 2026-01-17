@@ -1,9 +1,6 @@
 package at.technikum.springrestbackend.controller;
 
-import at.technikum.springrestbackend.dto.UserAdminUpdateRequestDto;
-import at.technikum.springrestbackend.dto.UserRequestDto;
-import at.technikum.springrestbackend.dto.UserResponseDto;
-import at.technikum.springrestbackend.dto.UserUpdateRequestDto;
+import at.technikum.springrestbackend.dto.*;
 import at.technikum.springrestbackend.entity.User;
 import at.technikum.springrestbackend.exception.UserNotFoundException;
 import at.technikum.springrestbackend.mapper.UserMapper;
@@ -111,6 +108,16 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> changePassword(
+            @PathVariable UUID id,
+            @Valid @RequestBody ChangePasswordRequestDto dto
+    ) {
+        userService.changePassword(id, dto.getCurrentPassword(), dto.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 }

@@ -51,7 +51,7 @@ services:
       - minio:/data
     networks:
       - app
-
+  
 volumes:
   db-data:
   minio:

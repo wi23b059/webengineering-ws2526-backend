@@ -175,4 +175,21 @@ public class UserService {
     public Optional<User> findByEmailOptional(String email) {
         return userRepository.findByEmail(email);
     }
+
+    @PreAuthorize("#id == authentication.principal.id")
+    @Transactional
+    public void changePassword(UUID id, String currentPassword, String newPassword) {
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
+
+        // Aktuelles Passwort prüfen
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Aktuelles Passwort ist falsch");
+        }
+
+        // Neues Passwort setzen
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
 }
