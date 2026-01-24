@@ -2,11 +2,13 @@ package at.technikum.springrestbackend.controller;
 
 import at.technikum.springrestbackend.dto.CartItemRequestDto;
 import at.technikum.springrestbackend.dto.CartItemResponseDto;
+import at.technikum.springrestbackend.security.UserPrincipal;
 import at.technikum.springrestbackend.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -77,5 +79,14 @@ public class CartController {
             @PathVariable Integer productId) {
         cartService.deleteCartItem(userId, productId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/replace")
+    public List<CartItemResponseDto> replaceCart(
+            @Valid @RequestBody List<CartItemRequestDto> items,
+            Authentication authentication
+    ) {
+        String userId = ((UserPrincipal) authentication.getPrincipal()).getId().toString();
+        return cartService.replaceCart(userId, items);
     }
 }

@@ -19,7 +19,7 @@ public class CartService {
 
     private final CartRepository cartRepository;
 
-    @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
+    @PreAuthorize("#userId == authentication.principal.id.toString() or hasRole('ADMIN')")
     public List<CartItemResponseDto> getCart(String userId) {
         return cartRepository.findByUserId(userId)
                 .stream()
@@ -27,7 +27,7 @@ public class CartService {
                 .toList();
     }
 
-    @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
+    @PreAuthorize("#userId == authentication.principal.id.toString() or hasRole('ADMIN')")
     @Transactional
     public CartItemResponseDto addCartItem(String userId, CartItemRequestDto dto) {
         Cart cart = CartMapper.toEntity(userId, dto);
@@ -35,7 +35,7 @@ public class CartService {
         return CartMapper.toResponseDto(saved);
     }
 
-    @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
+    @PreAuthorize("#userId == authentication.principal.id.toString() or hasRole('ADMIN')")
     @Transactional
     public CartItemResponseDto updateCartItem(String userId, Integer productId, CartItemRequestDto dto) {
         Cart cart = cartRepository.findByUserIdAndProductId(userId, productId)
@@ -45,9 +45,23 @@ public class CartService {
         return CartMapper.toResponseDto(updated);
     }
 
-    @PreAuthorize("#userId == authentication.principal.id or hasRole('ADMIN')")
+    @PreAuthorize("#userId == authentication.principal.id.toString() or hasRole('ADMIN')")
     @Transactional
     public void deleteCartItem(String userId, Integer productId) {
         cartRepository.deleteByUserIdAndProductId(userId, productId);
+    }
+
+    @Transactional
+    public List<CartItemResponseDto> replaceCart(String userId, List<CartItemRequestDto> items) {
+        cartRepository.deleteByUserId(userId);
+
+        for (CartItemRequestDto item : items) {
+            cartRepository.save(CartMapper.toEntity(userId, item));
+        }
+
+        return cartRepository.findByUserId(userId)
+                .stream()
+                .map(CartMapper::toResponseDto)
+                .toList();
     }
 }
