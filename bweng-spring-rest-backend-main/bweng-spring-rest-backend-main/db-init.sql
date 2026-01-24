@@ -64,7 +64,7 @@ CREATE TABLE orders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id CHAR(36) NOT NULL,
     total_price DECIMAL(10, 2) NOT NULL,
-    status ENUM('pending', 'completed', 'canceled') NOT NULL DEFAULT 'pending',
+    status ENUM('PENDING', 'COMPLETED', 'CANCELED') NOT NULL DEFAULT 'PENDING',
 	payment_method VARCHAR(50) DEFAULT NULL, -- Zahlungsmethode
 	invoice_number VARCHAR(20) DEFAULT NULL, -- Rechnungsnummer
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

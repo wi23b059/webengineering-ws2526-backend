@@ -26,11 +26,19 @@ public class OrderService {
                 .toList();
     }
 
-    @PreAuthorize("#id == authentication.principal.id or hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
     public OrderResponseDto getOrder(Integer id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
         return OrderMapper.toResponseDto(order);
+    }
+
+    @PreAuthorize("isAuthenticated() or hasRole('ADMIN')")
+    public List<OrderResponseDto> getOrdersByUser(String userId) {
+        return orderRepository.findByUserId(userId)
+                .stream()
+                .map(OrderMapper::toResponseDto)
+                .toList();
     }
 
     @PreAuthorize("#dto.userId == authentication.principal.id or hasRole('ADMIN')")
@@ -59,5 +67,27 @@ public class OrderService {
             throw new OrderNotFoundException(id);
         }
         orderRepository.deleteById(id);
+    }
+
+    @Transactional
+    public OrderResponseDto updateStatus(Integer orderId, String status) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (!status.equals("completed") && !status.equals("canceled")) {
+            throw new IllegalArgumentException("Invalid status");
+        }
+
+        Order.Status newStatus;
+        try {
+            newStatus = Order.Status.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ungültiger Bestellstatus: " + status);
+        }
+
+        order.setStatus(newStatus);
+        Order saved = orderRepository.save(order);
+
+        return OrderMapper.toResponseDto(saved);
     }
 }

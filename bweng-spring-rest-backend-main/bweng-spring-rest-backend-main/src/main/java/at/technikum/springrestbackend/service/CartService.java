@@ -64,4 +64,10 @@ public class CartService {
                 .map(CartMapper::toResponseDto)
                 .toList();
     }
+
+    @PreAuthorize("#userId == authentication.principal.id.toString() or hasRole('ADMIN')")
+    @Transactional
+    public void clearCart(String userId) {
+        cartRepository.deleteByUserId(userId);
+    }
 }

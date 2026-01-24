@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -13,6 +14,12 @@ import java.time.LocalDateTime;
 @Builder
 @Table(name = "orders")
 public class Order {
+
+    public enum Status {
+        PENDING,
+        COMPLETED,
+        CANCELED
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +49,11 @@ public class Order {
         createdAt = LocalDateTime.now();
     }
 
-    public enum Status {
-        pending, completed, canceled
-    }
+    @OneToMany(
+            mappedBy = "order",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
+    private List<OrderItem> orderItems;
 }

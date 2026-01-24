@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
 
-    List<OrderItem> findByOrderId(Integer orderId);
+    List<OrderItem> findByOrder_Id(Integer orderId);
 
-    Optional<OrderItem> findByOrderIdAndId(Integer orderId, Integer id);
+    Optional<OrderItem> findByOrder_IdAndId(Integer orderId, Integer id);
 
-    void deleteByOrderIdAndId(Integer orderId, Integer id);
+    void deleteByOrder_IdAndId(Integer orderId, Integer id);
 }

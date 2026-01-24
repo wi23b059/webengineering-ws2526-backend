@@ -30,6 +30,11 @@ public class OrderController {
         return orderService.getOrder(id);
     }
 
+    @GetMapping("/user/{userId}")
+    public List<OrderResponseDto> getOrdersByUser(@PathVariable String userId) {
+        return orderService.getOrdersByUser(userId);
+    }
+
     @PostMapping
     public OrderResponseDto createOrder(@Valid @RequestBody OrderRequestDto dto) {
         return orderService.createOrder(dto);
@@ -44,5 +49,14 @@ public class OrderController {
     public ResponseEntity<Void> deleteOrder(@PathVariable Integer id) {
         orderService.deleteOrder(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<OrderResponseDto> updateOrderStatus(
+            @PathVariable Integer id,
+            @RequestParam("status") String status) {
+
+        OrderResponseDto updatedOrder = orderService.updateStatus(id, status);
+        return ResponseEntity.ok(updatedOrder);
     }
 }
