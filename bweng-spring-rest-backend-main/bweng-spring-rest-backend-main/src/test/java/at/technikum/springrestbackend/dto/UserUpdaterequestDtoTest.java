@@ -33,14 +33,15 @@ class UserUpdateRequestDtoTest {
     @Test
     void allArgsConstructorSetsFieldsCorrectly() {
         UserUpdateRequestDto dto = new UserUpdateRequestDto(
-                Salutation.MR,
-                "Anna",
-                "Müller",
-                "DE",
-                "Hauptstraße 2",
-                "Berlin",
-                "12345",
-                "Abcd1234"
+                Salutation.MR,        // salutation
+                "Anna",               // firstName
+                "Müller",             // lastName
+                "DE",                 // countryCode
+                "Hauptstraße 2",      // address
+                "Berlin",             // city
+                "12345",              // zip
+                "Abcd1234",           // password
+                null                  // profilePicturePath (optional)
         );
 
         assertThat(dto.getSalutation()).isEqualTo(Salutation.MR);
@@ -51,5 +52,6 @@ class UserUpdateRequestDtoTest {
         assertThat(dto.getCity()).isEqualTo("Berlin");
         assertThat(dto.getZip()).isEqualTo("12345");
         assertThat(dto.getPassword()).isEqualTo("Abcd1234");
+        assertThat(dto.getProfilePicturePath()).isNull();
     }
 }

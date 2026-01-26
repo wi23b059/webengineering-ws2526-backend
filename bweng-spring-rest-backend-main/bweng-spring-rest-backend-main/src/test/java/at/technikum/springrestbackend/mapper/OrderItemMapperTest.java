@@ -2,6 +2,7 @@ package at.technikum.springrestbackend.mapper;
 
 import at.technikum.springrestbackend.dto.OrderItemRequestDto;
 import at.technikum.springrestbackend.dto.OrderItemResponseDto;
+import at.technikum.springrestbackend.entity.Order;
 import at.technikum.springrestbackend.entity.OrderItem;
 import org.junit.jupiter.api.Test;
 
@@ -13,9 +14,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class OrderItemMapperTest {
 
     @Test
-    void toEntity_shouldMapOrderIdAndRequestDtoToOrderItemEntity() {
+    void toEntity_shouldMapOrderAndRequestDtoToOrderItemEntity() {
         // given
-        Integer orderId = 42;
+        Order order = Order.builder()
+                .id(42)
+                .build();
+
         OrderItemRequestDto dto = OrderItemRequestDto.builder()
                 .productId(7)
                 .quantity(3)
@@ -23,11 +27,11 @@ class OrderItemMapperTest {
                 .build();
 
         // when
-        OrderItem orderItem = OrderItemMapper.toEntity(orderId, dto);
+        OrderItem orderItem = OrderItemMapper.toEntity(order, dto);
 
         // then
         assertNotNull(orderItem);
-        assertEquals(orderId, orderItem.getOrderId());
+        assertEquals(order, orderItem.getOrder());
         assertEquals(7, orderItem.getProductId());
         assertEquals(3, orderItem.getQuantity());
         assertEquals(new BigDecimal("19.99"), orderItem.getPrice());
@@ -38,9 +42,13 @@ class OrderItemMapperTest {
         // given
         LocalDateTime createdAt = LocalDateTime.now();
 
+        Order order = Order.builder()
+                .id(42)
+                .build();
+
         OrderItem orderItem = OrderItem.builder()
                 .id(5)
-                .orderId(42)
+                .order(order)
                 .productId(7)
                 .quantity(3)
                 .price(new BigDecimal("19.99"))

@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.repository;
 
+import at.technikum.springrestbackend.entity.Order;
 import at.technikum.springrestbackend.entity.OrderItem;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,39 +18,55 @@ class OrderItemRepositoryTest {
     @Autowired
     private OrderItemRepository orderItemRepository;
 
+    @Autowired
+    private OrderRepository orderRepository;
+
+    // -------------------------------------------------------------------------
+    // findByOrder_Id
+    // -------------------------------------------------------------------------
+
     @Test
     void saveAndFindByOrderId_shouldReturnItemsForOrder() {
         // given
+        Order order = orderRepository.save(Order.builder().build());
+
         OrderItem item1 = OrderItem.builder()
-                .orderId(1)
+                .order(order)
                 .productId(10)
                 .quantity(2)
                 .price(BigDecimal.valueOf(19.99))
                 .build();
 
         OrderItem item2 = OrderItem.builder()
-                .orderId(1)
+                .order(order)
                 .productId(11)
                 .quantity(1)
                 .price(BigDecimal.valueOf(9.99))
                 .build();
 
-        orderItemRepository.save(item1);
-        orderItemRepository.save(item2);
+        orderItemRepository.saveAll(List.of(item1, item2));
 
         // when
-        List<OrderItem> result = orderItemRepository.findByOrderId(1);
+        List<OrderItem> result =
+                orderItemRepository.findByOrder_Id(order.getId());
 
         // then
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(i -> i.getOrderId().equals(1)));
+        assertTrue(result.stream()
+                .allMatch(i -> i.getOrder().getId().equals(order.getId())));
     }
+
+    // -------------------------------------------------------------------------
+    // findByOrder_IdAndId
+    // -------------------------------------------------------------------------
 
     @Test
     void findByOrderIdAndId_shouldReturnCorrectItem() {
         // given
+        Order order = orderRepository.save(Order.builder().build());
+
         OrderItem item = OrderItem.builder()
-                .orderId(2)
+                .order(order)
                 .productId(20)
                 .quantity(3)
                 .price(BigDecimal.valueOf(29.99))
@@ -59,29 +76,38 @@ class OrderItemRepositoryTest {
 
         // when
         Optional<OrderItem> result =
-                orderItemRepository.findByOrderIdAndId(2, saved.getId());
+                orderItemRepository.findByOrder_IdAndId(
+                        order.getId(),
+                        saved.getId()
+                );
 
         // then
         assertTrue(result.isPresent());
         assertEquals(saved.getId(), result.get().getId());
-        assertEquals(2, result.get().getOrderId());
+        assertEquals(order.getId(), result.get().getOrder().getId());
     }
 
     @Test
     void findByOrderIdAndId_shouldReturnEmptyIfNotFound() {
         // when
         Optional<OrderItem> result =
-                orderItemRepository.findByOrderIdAndId(999, 999);
+                orderItemRepository.findByOrder_IdAndId(999, 999);
 
         // then
         assertTrue(result.isEmpty());
     }
 
+    // -------------------------------------------------------------------------
+    // deleteByOrder_IdAndId
+    // -------------------------------------------------------------------------
+
     @Test
     void deleteByOrderIdAndId_shouldRemoveItem() {
         // given
+        Order order = orderRepository.save(Order.builder().build());
+
         OrderItem item = OrderItem.builder()
-                .orderId(3)
+                .order(order)
                 .productId(30)
                 .quantity(1)
                 .price(BigDecimal.valueOf(49.99))
@@ -90,11 +116,18 @@ class OrderItemRepositoryTest {
         OrderItem saved = orderItemRepository.save(item);
 
         // when
-        orderItemRepository.deleteByOrderIdAndId(3, saved.getId());
+        orderItemRepository.deleteByOrder_IdAndId(
+                order.getId(),
+                saved.getId()
+        );
+        orderItemRepository.flush();
 
         // then
         Optional<OrderItem> result =
-                orderItemRepository.findByOrderIdAndId(3, saved.getId());
+                orderItemRepository.findByOrder_IdAndId(
+                        order.getId(),
+                        saved.getId()
+                );
 
         assertTrue(result.isEmpty());
     }

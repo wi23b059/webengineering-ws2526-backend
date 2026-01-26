@@ -22,13 +22,13 @@ class OrderRepositoryTest {
         Order order1 = Order.builder()
                 .userId("user1")
                 .totalPrice(BigDecimal.valueOf(100))
-                .status(Order.Status.pending)
+                .status(Order.Status.PENDING)
                 .build();
 
         Order order2 = Order.builder()
                 .userId("user1")
                 .totalPrice(BigDecimal.valueOf(50))
-                .status(Order.Status.pending)
+                .status(Order.Status.PENDING)
                 .build();
 
         orderRepository.save(order1);

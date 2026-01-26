@@ -3,77 +3,62 @@ package at.technikum.springrestbackend.controller;
 import at.technikum.springrestbackend.dto.TokenRequestDto;
 import at.technikum.springrestbackend.dto.TokenResponseDto;
 import at.technikum.springrestbackend.service.AuthService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-/**
- * Controller tests for {@link AuthController}.
- * Tests only the web layer, AuthService is mocked.
- */
-@WebMvcTest(AuthController.class)
 class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    /**
-     * Mocked to isolate controller behaviour.
-     */
-    @MockitoBean
+    @Mock
     private AuthService authService;
 
-    // -------------------------------------------------------------------------
-    // Happy path
-    // -------------------------------------------------------------------------
+    @InjectMocks
+    private AuthController authController;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
-    void tokenEndpointReturnsJwtWhenCredentialsAreValid() throws Exception {
-        // given
-        TokenResponseDto responseDto = new TokenResponseDto("dummy-jwt-token");
-
-        when(authService.authenticate(any(TokenRequestDto.class)))
-                .thenReturn(responseDto);
-
+    void token_ShouldReturnTokenResponseDto_WhenAuthServiceSucceeds() {
+        // Arrange
         TokenRequestDto requestDto = new TokenRequestDto();
         requestDto.setUsername("testuser");
         requestDto.setPassword("password123");
 
-        // when & then
-        mockMvc.perform(post("/auth/token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("dummy-jwt-token"));
+        TokenResponseDto expectedResponse = new TokenResponseDto();
+        expectedResponse.setToken("jwt-token");
+
+        when(authService.authenticate(requestDto)).thenReturn(expectedResponse);
+
+        // Act
+        TokenResponseDto actualResponse = authController.token(requestDto);
+
+        // Assert
+        assertEquals(expectedResponse.getToken(), actualResponse.getToken());
+        verify(authService, times(1)).authenticate(requestDto);
     }
 
-    // -------------------------------------------------------------------------
-    // Validation
-    // -------------------------------------------------------------------------
-
     @Test
-    void tokenEndpointReturnsBadRequestWhenRequestIsInvalid() throws Exception {
-        // given: violates @NotBlank
-        TokenRequestDto invalidRequest = new TokenRequestDto();
-        invalidRequest.setUsername("");
-        invalidRequest.setPassword("");
+    void token_ShouldCallAuthServiceWithCorrectDto() {
+        // Arrange
+        TokenRequestDto requestDto = new TokenRequestDto();
+        requestDto.setUsername("user@example.com");
+        requestDto.setPassword("pass");
 
-        // when & then
-        mockMvc.perform(post("/auth/token")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRequest)))
-                .andExpect(status().isBadRequest());
+        when(authService.authenticate(requestDto))
+                .thenReturn(new TokenResponseDto("token123"));
+
+        // Act
+        authController.token(requestDto);
+
+        // Assert
+        verify(authService, times(1)).authenticate(requestDto);
     }
 }

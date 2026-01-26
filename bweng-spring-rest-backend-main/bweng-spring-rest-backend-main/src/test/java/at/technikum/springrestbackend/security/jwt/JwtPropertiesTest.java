@@ -1,21 +1,22 @@
 package at.technikum.springrestbackend.security.jwt;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
+import static org.junit.jupiter.api.Assertions.*;
 
-// normally this test is not neccessary, bc it only tests the springboot-functionality
-
-@SpringBootTest
 class JwtPropertiesTest {
 
-    @Autowired
-    private JwtProperties jwtProperties;
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+            .withPropertyValues("security.jwt.secret=my-secret-key")
+            .withUserConfiguration(JwtProperties.class);
 
     @Test
-    void secretIsLoaded() {
-        assertEquals("mysecretkey", jwtProperties.getSecret());
+    void testJwtSecretInjection() {
+        contextRunner.run(context -> {
+            assertTrue(context.containsBean("jwtProperties"));
+            JwtProperties props = context.getBean(JwtProperties.class);
+            assertEquals("my-secret-key", props.getSecret());
+        });
     }
 }

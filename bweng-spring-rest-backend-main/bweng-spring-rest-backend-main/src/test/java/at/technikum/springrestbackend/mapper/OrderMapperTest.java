@@ -6,58 +6,58 @@ import at.technikum.springrestbackend.entity.Order;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class OrderMapperTest {
 
     @Test
-    void toEntity_shouldMapOrderRequestDtoToOrderEntity() {
-        // given
+    void testToEntity() {
+        UUID userId = UUID.randomUUID();
+
+        // DTO hat userId als String, nicht UUID
         OrderRequestDto dto = OrderRequestDto.builder()
-                .userId("user-123")
-                .totalPrice(new BigDecimal("99.99"))
+                .userId(userId.toString()) // Korrektur: String statt UUID
+                .totalPrice(new BigDecimal("123.45"))
                 .paymentMethod("CREDIT_CARD")
                 .build();
 
-        // when
-        Order order = OrderMapper.toEntity(dto);
+        Order entity = OrderMapper.toEntity(dto);
 
-        // then
-        assertNotNull(order);
-        assertEquals("user-123", order.getUserId());
-        assertEquals(new BigDecimal("99.99"), order.getTotalPrice());
-        assertEquals("CREDIT_CARD", order.getPaymentMethod());
-        assertEquals(Order.Status.pending, order.getStatus());
+        assertNotNull(entity);
+        assertEquals(userId.toString(), entity.getUserId()); // Entity hat UUID
+        assertEquals(new BigDecimal("123.45"), entity.getTotalPrice());
+        assertEquals("CREDIT_CARD", entity.getPaymentMethod());
+        assertEquals(Order.Status.PENDING, entity.getStatus());
     }
 
     @Test
-    void toResponseDto_shouldMapOrderEntityToOrderResponseDto() {
-        // given
-        LocalDateTime createdAt = LocalDateTime.now();
+    void testToResponseDtoWithItems() {
+        UUID userId = UUID.randomUUID();
 
         Order order = Order.builder()
-                .id(10)
-                .userId("user-123")
-                .totalPrice(new BigDecimal("99.99"))
-                .status(Order.Status.completed)
-                .createdAt(createdAt)
+                .id(1)
+                .userId(userId.toString())
+                .totalPrice(new BigDecimal("200.00"))
+                .status(Order.Status.PENDING)
                 .paymentMethod("PAYPAL")
-                .invoiceNumber("INV-2024-001")
+                .invoiceNumber("INV-001")
                 .build();
 
-        // when
-        OrderResponseDto responseDto = OrderMapper.toResponseDto(order);
+        order.setOrderItems(Collections.emptyList()); // Leere Liste statt null
 
-        // then
-        assertNotNull(responseDto);
-        assertEquals(10, responseDto.getId());
-        assertEquals("user-123", responseDto.getUserId());
-        assertEquals(new BigDecimal("99.99"), responseDto.getTotalPrice());
-        assertEquals("completed", responseDto.getStatus());
-        assertEquals(createdAt, responseDto.getCreatedAt());
-        assertEquals("PAYPAL", responseDto.getPaymentMethod());
-        assertEquals("INV-2024-001", responseDto.getInvoiceNumber());
+        OrderResponseDto dto = OrderMapper.toResponseDto(order);
+
+        assertNotNull(dto);
+        assertEquals(order.getId(), dto.getId());
+        assertEquals(userId.toString(), dto.getUserId()); // DTO hat String userId
+        assertEquals(order.getTotalPrice(), dto.getTotalPrice());
+        assertEquals(order.getStatus().name(), dto.getStatus());
+        assertEquals(order.getPaymentMethod(), dto.getPaymentMethod());
+        assertEquals(order.getInvoiceNumber(), dto.getInvoiceNumber());
+        assertNotNull(dto.getItems());
+        assertTrue(dto.getItems().isEmpty());
     }
 }

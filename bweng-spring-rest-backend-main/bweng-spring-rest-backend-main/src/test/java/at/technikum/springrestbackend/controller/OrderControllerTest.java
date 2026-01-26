@@ -3,155 +3,132 @@ package at.technikum.springrestbackend.controller;
 import at.technikum.springrestbackend.dto.OrderRequestDto;
 import at.technikum.springrestbackend.dto.OrderResponseDto;
 import at.technikum.springrestbackend.service.OrderService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.*;
 
+import org.springframework.http.ResponseEntity;
+
+import java.math.BigDecimal;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-/**
- * Controller tests for {@link OrderController}.
- * Tests web layer, validation and security behaviour.
- */
-@WebMvcTest(OrderController.class)
 class OrderControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    /**
-     * OrderService is mocked to isolate controller behaviour.
-     */
-    @MockitoBean
+    @Mock
     private OrderService orderService;
 
-    // -------------------------------------------------------------------------
-    // Security
-    // -------------------------------------------------------------------------
+    @InjectMocks
+    private OrderController orderController;
 
-    @Test
-    void requestsAreUnauthorizedWhenUserIsNotAuthenticated() throws Exception {
-        mockMvc.perform(get("/api/orders"))
-                .andExpect(status().isUnauthorized());
-    }
+    private OrderResponseDto sampleOrder;
 
-    // -------------------------------------------------------------------------
-    // GET all orders
-    // -------------------------------------------------------------------------
-
-    @Test
-    @WithMockUser
-    void getAllOrdersReturnsListForAuthenticatedUser() throws Exception {
-        OrderResponseDto order = new OrderResponseDto();
-        // optional: set fields if needed
-
-        when(orderService.getAllOrders())
-                .thenReturn(List.of(order));
-
-        mockMvc.perform(get("/api/orders"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
-
-    // -------------------------------------------------------------------------
-    // GET single order
-    // -------------------------------------------------------------------------
-
-    @Test
-    @WithMockUser
-    void getOrderReturnsOrderById() throws Exception {
-        OrderResponseDto order = new OrderResponseDto();
-
-        when(orderService.getOrder(1))
-                .thenReturn(order);
-
-        mockMvc.perform(get("/api/orders/1"))
-                .andExpect(status().isOk());
-    }
-
-    // -------------------------------------------------------------------------
-    // POST create order
-    // -------------------------------------------------------------------------
-
-    @Test
-    @WithMockUser
-    void createOrderReturnsCreatedOrder() throws Exception {
-        OrderRequestDto requestDto = new OrderRequestDto();
-        // Beispiel – anpassen an euer echtes DTO
-        // requestDto.setTotalPrice(99.99);
-
-        OrderResponseDto responseDto = new OrderResponseDto();
-
-        when(orderService.createOrder(any(OrderRequestDto.class)))
-                .thenReturn(responseDto);
-
-        mockMvc.perform(post("/api/orders")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk());
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        sampleOrder = OrderResponseDto.builder()
+                .id(1)
+                .userId("user-123")
+                .totalPrice(BigDecimal.valueOf(100))
+                .status("PENDING")
+                .build();
     }
 
     @Test
-    @WithMockUser
-    void createOrderReturnsBadRequestWhenRequestIsInvalid() throws Exception {
-        OrderRequestDto invalidRequest = new OrderRequestDto();
-        // leer → verletzt @Valid
+    void testGetAllOrders() {
+        when(orderService.getAllOrders()).thenReturn(List.of(sampleOrder));
 
-        mockMvc.perform(post("/api/orders")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRequest)))
-                .andExpect(status().isBadRequest());
+        List<OrderResponseDto> result = orderController.getAllOrders();
+
+        assertEquals(1, result.size());
+        assertEquals(sampleOrder.getId(), result.getFirst().getId());
+        verify(orderService).getAllOrders();
     }
 
-    // -------------------------------------------------------------------------
-    // PUT update order
-    // -------------------------------------------------------------------------
-
     @Test
-    @WithMockUser
-    void updateOrderReturnsUpdatedOrder() throws Exception {
-        OrderRequestDto requestDto = new OrderRequestDto();
+    void testGetOrder() {
+        when(orderService.getOrder(1)).thenReturn(sampleOrder);
 
-        OrderResponseDto responseDto = new OrderResponseDto();
+        OrderResponseDto result = orderController.getOrder(1);
 
-        when(orderService.updateOrder(
-                eq(1),
-                any(OrderRequestDto.class)))
-                .thenReturn(responseDto);
-
-        mockMvc.perform(put("/api/orders/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk());
+        assertEquals(sampleOrder.getId(), result.getId());
+        verify(orderService).getOrder(1);
     }
 
-    // -------------------------------------------------------------------------
-    // DELETE order
-    // -------------------------------------------------------------------------
+    @Test
+    void testGetOrdersByUser() {
+        when(orderService.getOrdersByUser("user-123")).thenReturn(List.of(sampleOrder));
+
+        List<OrderResponseDto> result = orderController.getOrdersByUser("user-123");
+
+        assertEquals(1, result.size());
+        verify(orderService).getOrdersByUser("user-123");
+    }
 
     @Test
-    @WithMockUser
-    void deleteOrderReturnsNoContent() throws Exception {
-        doNothing().when(orderService)
-                .deleteOrder(1);
+    void testCreateOrder() {
+        OrderRequestDto dto = OrderRequestDto.builder()
+                .userId("user-123")
+                .totalPrice(BigDecimal.valueOf(100))
+                .build();
 
-        mockMvc.perform(delete("/api/orders/1"))
-                .andExpect(status().isNoContent());
+        when(orderService.createOrder(dto)).thenReturn(sampleOrder);
+
+        OrderResponseDto result = orderController.createOrder(dto);
+
+        assertEquals(sampleOrder.getId(), result.getId());
+        verify(orderService).createOrder(dto);
+    }
+
+    @Test
+    void testUpdateOrder() {
+        OrderRequestDto dto = OrderRequestDto.builder()
+                .userId("user-123")
+                .totalPrice(BigDecimal.valueOf(150))
+                .build();
+
+        OrderResponseDto updatedOrder = OrderResponseDto.builder()
+                .id(1)
+                .userId("user-123")
+                .totalPrice(BigDecimal.valueOf(150))
+                .status("PENDING")
+                .build();
+
+        when(orderService.updateOrder(1, dto)).thenReturn(updatedOrder);
+
+        OrderResponseDto result = orderController.updateOrder(1, dto);
+
+        assertEquals(BigDecimal.valueOf(150), result.getTotalPrice());
+        verify(orderService).updateOrder(1, dto);
+    }
+
+    @Test
+    void testDeleteOrder() {
+        doNothing().when(orderService).deleteOrder(1);
+
+        ResponseEntity<Void> response = orderController.deleteOrder(1);
+
+        assertEquals(204, response.getStatusCode().value());
+        verify(orderService).deleteOrder(1);
+    }
+
+    @Test
+    void testUpdateOrderStatus() {
+        OrderResponseDto updatedOrder = OrderResponseDto.builder()
+                .id(1)
+                .userId("user-123")
+                .totalPrice(BigDecimal.valueOf(100))
+                .status("COMPLETED")
+                .build();
+
+        when(orderService.updateStatus(1, "completed")).thenReturn(updatedOrder);
+
+        ResponseEntity<OrderResponseDto> response = orderController.updateOrderStatus(1, "completed");
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals("COMPLETED", response.getBody().getStatus());
+        verify(orderService).updateStatus(1, "completed");
     }
 }

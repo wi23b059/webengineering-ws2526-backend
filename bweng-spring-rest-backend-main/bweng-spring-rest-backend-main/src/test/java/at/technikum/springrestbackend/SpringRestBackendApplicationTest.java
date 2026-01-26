@@ -8,7 +8,7 @@ class SpringRestBackendApplicationTest {
 
     @Test
     void contextLoads() {
-        // Dieser Test prüft nur, ob der Spring ApplicationContext erfolgreich startet.
-        // Keine weiteren Assertions notwendig.
+        // Testet lediglich, ob der Spring Application Context erfolgreich startet.
+        // Wenn der Context nicht geladen werden kann, schlägt der Test fehl.
     }
 }

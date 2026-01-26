@@ -1,122 +1,119 @@
 package at.technikum.springrestbackend.service;
 
 import at.technikum.springrestbackend.dto.OrderRequestDto;
+import at.technikum.springrestbackend.dto.OrderResponseDto;
 import at.technikum.springrestbackend.entity.Order;
 import at.technikum.springrestbackend.exception.OrderNotFoundException;
+import at.technikum.springrestbackend.mapper.OrderMapper;
 import at.technikum.springrestbackend.repository.OrderRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
-    @Mock
     private OrderRepository orderRepository;
-
-    @InjectMocks
     private OrderService orderService;
 
+    @BeforeEach
+    void setUp() {
+        orderRepository = mock(OrderRepository.class);
+        orderService = new OrderService(orderRepository);
+    }
+
     @Test
-    void getAllOrders_shouldReturnList() {
+    void getAllOrders_returnsAllOrders() {
+        Order order = new Order();
+        when(orderRepository.findAll()).thenReturn(List.of(order));
+
+        List<OrderResponseDto> result = orderService.getAllOrders();
+
+        assertEquals(1, result.size());
+        verify(orderRepository).findAll();
+    }
+
+    @Test
+    void getOrder_existingId_returnsOrder() {
         Order order = new Order();
         order.setId(1);
+        when(orderRepository.findById(1)).thenReturn(Optional.of(order));
 
-        when(orderRepository.findAll())
-                .thenReturn(List.of(order));
+        OrderResponseDto dto = orderService.getOrder(1);
 
-        var result = orderService.getAllOrders();
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getId()).isEqualTo(1);
+        assertEquals(1, dto.getId());
+        verify(orderRepository).findById(1);
     }
 
     @Test
-    void getOrder_shouldReturnOrder() {
+    void getOrder_nonExistingId_throwsException() {
+        when(orderRepository.findById(99)).thenReturn(Optional.empty());
+        assertThrows(OrderNotFoundException.class, () -> orderService.getOrder(99));
+    }
+
+    @Test
+    void getOrdersByUser_returnsUserOrders() {
         Order order = new Order();
-        order.setId(1);
+        order.setUserId("user1");
+        when(orderRepository.findByUserId("user1")).thenReturn(List.of(order));
 
-        when(orderRepository.findById(1))
-                .thenReturn(Optional.of(order));
+        List<OrderResponseDto> result = orderService.getOrdersByUser("user1");
 
-        var result = orderService.getOrder(1);
-
-        assertThat(result.getId()).isEqualTo(1);
+        assertEquals(1, result.size());
+        verify(orderRepository).findByUserId("user1");
     }
 
     @Test
-    void getOrder_shouldThrowException_whenNotFound() {
-        when(orderRepository.findById(1))
-                .thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> orderService.getOrder(1))
-                .isInstanceOf(OrderNotFoundException.class);
-    }
-
-    @Test
-    void createOrder_shouldSaveAndReturnOrder() {
+    void createOrder_savesAndReturnsOrder() {
         OrderRequestDto dto = new OrderRequestDto();
-        dto.setUserId("10");
-        dto.setTotalPrice(BigDecimal.valueOf(49.99));
-        dto.setPaymentMethod("CREDIT_CARD");
+        dto.setUserId("user1");
+        dto.setTotalPrice(BigDecimal.TEN);
+        dto.setPaymentMethod("INVOICE");
 
-        Order saved = new Order();
-        saved.setId(1);
+        Order savedOrder = OrderMapper.toEntity(dto);
+        savedOrder.setId(1);
 
-        when(orderRepository.save(any(Order.class)))
-                .thenReturn(saved);
+        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
 
-        var result = orderService.createOrder(dto);
+        OrderResponseDto response = orderService.createOrder(dto);
 
-        assertThat(result.getId()).isEqualTo(1);
+        assertEquals(1, response.getId());
         verify(orderRepository).save(any(Order.class));
     }
 
     @Test
-    void updateOrder_shouldUpdateExistingOrder() {
+    void updateOrder_existingOrder_updatesAndReturns() {
         Order existing = new Order();
         existing.setId(1);
+        existing.setTotalPrice(BigDecimal.ONE);
+        when(orderRepository.findById(1)).thenReturn(Optional.of(existing));
+        when(orderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         OrderRequestDto dto = new OrderRequestDto();
-        dto.setTotalPrice(BigDecimal.valueOf(99.99));
-        dto.setPaymentMethod("PAYPAL");
+        dto.setTotalPrice(BigDecimal.TEN);
+        dto.setPaymentMethod("CARD");
 
-        when(orderRepository.findById(1))
-                .thenReturn(Optional.of(existing));
-        when(orderRepository.save(existing))
-                .thenReturn(existing);
+        OrderResponseDto updated = orderService.updateOrder(1, dto);
 
-        var result = orderService.updateOrder(1, dto);
-
-        assertThat(result.getTotalPrice()).isEqualTo(BigDecimal.valueOf(99.99));
-        verify(orderRepository).save(existing);
+        assertEquals(BigDecimal.TEN, updated.getTotalPrice());
+        assertEquals("CARD", updated.getPaymentMethod());
     }
 
     @Test
-    void updateOrder_shouldThrowException_whenNotFound() {
-        when(orderRepository.findById(1))
-                .thenReturn(Optional.empty());
-
+    void updateOrder_nonExisting_throwsException() {
+        when(orderRepository.findById(99)).thenReturn(Optional.empty());
         OrderRequestDto dto = new OrderRequestDto();
-
-        assertThatThrownBy(() -> orderService.updateOrder(1, dto))
-                .isInstanceOf(OrderNotFoundException.class);
+        assertThrows(OrderNotFoundException.class, () -> orderService.updateOrder(99, dto));
     }
 
     @Test
-    void deleteOrder_shouldDeleteOrder() {
-        when(orderRepository.existsById(1))
-                .thenReturn(true);
+    void deleteOrder_existingOrder_deletes() {
+        when(orderRepository.existsById(1)).thenReturn(true);
 
         orderService.deleteOrder(1);
 
@@ -124,11 +121,35 @@ class OrderServiceTest {
     }
 
     @Test
-    void deleteOrder_shouldThrowException_whenNotFound() {
-        when(orderRepository.existsById(1))
-                .thenReturn(false);
+    void deleteOrder_nonExisting_throwsException() {
+        when(orderRepository.existsById(99)).thenReturn(false);
+        assertThrows(OrderNotFoundException.class, () -> orderService.deleteOrder(99));
+    }
 
-        assertThatThrownBy(() -> orderService.deleteOrder(1))
-                .isInstanceOf(OrderNotFoundException.class);
+    @Test
+    void updateStatus_validStatus_updatesAndReturns() {
+        Order order = new Order();
+        order.setId(1);
+        when(orderRepository.findById(1)).thenReturn(Optional.of(order));
+        when(orderRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        OrderResponseDto updated = orderService.updateStatus(1, "completed");
+
+        assertEquals("COMPLETED", updated.getStatus());
+    }
+
+    @Test
+    void updateStatus_invalidStatus_throwsException() {
+        Order order = new Order();
+        order.setId(1);
+        when(orderRepository.findById(1)).thenReturn(Optional.of(order));
+
+        assertThrows(IllegalArgumentException.class, () -> orderService.updateStatus(1, "invalid"));
+    }
+
+    @Test
+    void updateStatus_nonExistingOrder_throwsException() {
+        when(orderRepository.findById(99)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> orderService.updateStatus(99, "completed"));
     }
 }

@@ -6,7 +6,9 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,14 +16,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Unit tests for {@link SwaggerConfig}.
  * Verifies OpenAPI bean creation and JWT security configuration.
  */
-@SpringBootTest
+@SpringJUnitConfig
+@Import(SwaggerConfig.class) // Nur die SwaggerConfig laden
 class SwaggerConfigTest {
 
-    @Autowired
+    @MockitoBean
     private OpenAPI openAPI;
 
     @Test
     void openApiBeanExists() {
+        SwaggerConfig config = new SwaggerConfig();
+        OpenAPI openAPI = config.openAPI();
         assertThat(openAPI).isNotNull();
     }
 
@@ -30,8 +35,7 @@ class SwaggerConfigTest {
         assertThat(openAPI.getSecurity()).isNotNull();
         assertThat(openAPI.getSecurity()).isNotEmpty();
 
-        SecurityRequirement requirement = openAPI.getSecurity().get(0);
-
+        SecurityRequirement requirement = openAPI.getSecurity().getFirst();
         assertThat(requirement).containsKeys("Bearer Token", "API Cookie");
     }
 

@@ -37,59 +37,40 @@ class CustomUserDetailsServiceTest {
                 .role(Role.USER)
                 .build();
 
+        // Mock: User wird per Username gefunden
         when(userService.findByUsernameOptional("bob"))
                 .thenReturn(Optional.of(user));
-        when(userService.findByEmailOptional("bob"))
-                .thenReturn(Optional.empty());
 
+        // Act
         UserDetails result = customUserDetailsService.loadUserByUsername("bob");
 
+        // Assert
         assertNotNull(result);
         assertEquals("bob", result.getUsername());
         assertEquals("encodedPassword", result.getPassword());
         assertTrue(result.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
 
+        // Verify: nur findByUsernameOptional wird aufgerufen
         verify(userService).findByUsernameOptional("bob");
-        verify(userService).findByEmailOptional("bob");
-    }
-
-    @Test
-    void loadUserByUsername_findsUserByEmail() {
-        UUID userId = UUID.randomUUID();
-
-        User user = User.builder()
-                .id(userId)
-                .username("alice")
-                .password("encodedPassword")
-                .role(Role.ADMIN)
-                .build();
-
-        when(userService.findByUsernameOptional("alice@example.com"))
-                .thenReturn(Optional.empty());
-        when(userService.findByEmailOptional("alice@example.com"))
-                .thenReturn(Optional.of(user));
-
-        UserDetails result = customUserDetailsService.loadUserByUsername("alice@example.com");
-
-        assertNotNull(result);
-        assertEquals("alice", result.getUsername());
-        assertTrue(result.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
+        verifyNoMoreInteractions(userService);
     }
 
     @Test
     void loadUserByUsername_throwsException_whenUserNotFound() {
+        // Mock: kein User vorhanden
         when(userService.findByUsernameOptional("unknown"))
                 .thenReturn(Optional.empty());
-        when(userService.findByEmailOptional("unknown"))
-                .thenReturn(Optional.empty());
 
+        // Act & Assert
         UsernameNotFoundException ex = assertThrows(
                 UsernameNotFoundException.class,
                 () -> customUserDetailsService.loadUserByUsername("unknown")
         );
 
         assertTrue(ex.getMessage().contains("User not found"));
+
+        verify(userService).findByUsernameOptional("unknown");
+        verifyNoMoreInteractions(userService);
     }
 }

@@ -19,7 +19,7 @@ class OrderTest {
                 .id(1)
                 .userId("user123")
                 .totalPrice(BigDecimal.valueOf(99.99))
-                .status(Order.Status.pending)
+                .status(Order.Status.PENDING)
                 .createdAt(now)
                 .paymentMethod("CREDIT_CARD")
                 .invoiceNumber("INV-001")
@@ -29,7 +29,7 @@ class OrderTest {
         assertEquals(1, order.getId());
         assertEquals("user123", order.getUserId());
         assertEquals(BigDecimal.valueOf(99.99), order.getTotalPrice());
-        assertEquals(Order.Status.pending, order.getStatus());
+        assertEquals(Order.Status.PENDING, order.getStatus());
         assertEquals(now, order.getCreatedAt());
         assertEquals("CREDIT_CARD", order.getPaymentMethod());
         assertEquals("INV-001", order.getInvoiceNumber());
@@ -44,7 +44,7 @@ class OrderTest {
         order.setId(2);
         order.setUserId("user456");
         order.setTotalPrice(BigDecimal.TEN);
-        order.setStatus(Order.Status.completed);
+        order.setStatus(Order.Status.COMPLETED);
         order.setPaymentMethod("PAYPAL");
         order.setInvoiceNumber("INV-002");
 
@@ -52,7 +52,7 @@ class OrderTest {
         assertEquals(2, order.getId());
         assertEquals("user456", order.getUserId());
         assertEquals(BigDecimal.TEN, order.getTotalPrice());
-        assertEquals(Order.Status.completed, order.getStatus());
+        assertEquals(Order.Status.COMPLETED, order.getStatus());
         assertEquals("PAYPAL", order.getPaymentMethod());
         assertEquals("INV-002", order.getInvoiceNumber());
     }
@@ -73,8 +73,8 @@ class OrderTest {
     @Test
     void statusEnum_shouldContainExpectedValues() {
         // then
-        assertNotNull(Order.Status.valueOf("pending"));
-        assertNotNull(Order.Status.valueOf("completed"));
-        assertNotNull(Order.Status.valueOf("canceled"));
+        assertNotNull(Order.Status.valueOf("PENDING"));
+        assertNotNull(Order.Status.valueOf("COMPLETED"));
+        assertNotNull(Order.Status.valueOf("CANCELED"));
     }
 }

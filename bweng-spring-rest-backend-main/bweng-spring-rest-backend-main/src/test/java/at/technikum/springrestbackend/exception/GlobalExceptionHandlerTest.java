@@ -1,119 +1,81 @@
 package at.technikum.springrestbackend.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
+import java.util.List;
+import java.util.Map;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(controllers = GlobalExceptionHandlerTest.TestController.class)
-@Import(GlobalExceptionHandler.class)
 class GlobalExceptionHandlerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private GlobalExceptionHandler exceptionHandler;
 
-    /* ------------------------
-       NOT FOUND (404)
-     ------------------------ */
+    @BeforeEach
+    void setUp() {
+        exceptionHandler = new GlobalExceptionHandler();
+    }
+
     @Test
-    void shouldReturn404ForCategoryNotFound() throws Exception {
-        mockMvc.perform(get("/test/not-found"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error")
-                        .value("Category with id 1 not found."));
+    void handleNotFound_ReturnsNotFoundResponse() {
+        RuntimeException ex = new CategoryNotFoundException(404);
+
+        ResponseEntity<Map<String, String>> response = exceptionHandler.handleNotFound(ex);
+
+        assertEquals(404, response.getStatusCode().value());
+        assertEquals("Category not found", response.getBody().get("error"));
     }
 
-    /* ------------------------
-       CONFLICT (409)
-     ------------------------ */
     @Test
-    void shouldReturn409ForEmailAlreadyExists() throws Exception {
-        mockMvc.perform(get("/test/conflict"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error")
-                        .value("Email already in use: test@example.com"));
+    void handleConflict_ReturnsConflictResponse() {
+        RuntimeException ex = new EmailAlreadyExistsException("Email already exists");
+
+        ResponseEntity<Map<String, String>> response = exceptionHandler.handleConflict(ex);
+
+        assertEquals(409, response.getStatusCode().value());
+        assertEquals("Email already exists", response.getBody().get("error"));
     }
 
-    /* ------------------------
-       UNAUTHORIZED (401)
-     ------------------------ */
     @Test
-    void shouldReturn401ForBadCredentials() throws Exception {
-        mockMvc.perform(get("/test/bad-credentials"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error")
-                        .value("Bad credentials"));
+    void handleBadCredentials_ReturnsUnauthorizedResponse() {
+        BadCredentialsException ex = new BadCredentialsException("Bad credentials");
+
+        ResponseEntity<Map<String, String>> response = exceptionHandler.handleBadCredentials(ex);
+
+        assertEquals(401, response.getStatusCode().value());
+        assertEquals("Bad credentials", response.getBody().get("error"));
     }
 
-    /* ------------------------
-       USERNAME NOT FOUND (404)
-     ------------------------ */
     @Test
-    void shouldReturn404ForUsernameNotFound() throws Exception {
-        mockMvc.perform(get("/test/username-not-found"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error")
-                        .value("User not found"));
+    void handleUsernameNotFound_ReturnsNotFoundResponse() {
+        UsernameNotFoundException ex = new UsernameNotFoundException("User not found");
+
+        ResponseEntity<Map<String, String>> response = exceptionHandler.handleUsernameNotFound(ex);
+
+        assertEquals(404, response.getStatusCode().value());
+        assertEquals("User not found", response.getBody().get("error"));
     }
 
-    /* ------------------------
-       VALIDATION ERROR (400)
-     ------------------------ */
     @Test
-    void shouldReturn400ForValidationErrors() throws Exception {
-        mockMvc.perform(get("/test/validation"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.name")
-                        .value("must not be blank"));
-    }
+    void handleValidation_ReturnsBadRequestResponse() {
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        BindingResult bindingResult = mock(BindingResult.class);
 
-    /* -------------------------------------------------
-       Dummy Controller only for testing ExceptionHandler
-     ------------------------------------------------- */
-    @RestController
-    static class TestController {
+        FieldError fieldError = new FieldError("objectName", "field1", "must not be null");
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
+        when(ex.getBindingResult()).thenReturn(bindingResult);
 
-        @GetMapping("/test/not-found")
-        public void notFound() {
-            throw new CategoryNotFoundException(1);
-        }
+        ResponseEntity<Map<String, String>> response = exceptionHandler.handleValidation(ex);
 
-        @GetMapping("/test/conflict")
-        public void conflict() {
-            throw new EmailAlreadyExistsException("test@example.com");
-        }
-
-        @GetMapping("/test/bad-credentials")
-        public void badCredentials() {
-            throw new BadCredentialsException("Bad credentials");
-        }
-
-        @GetMapping("/test/username-not-found")
-        public void usernameNotFound() {
-            throw new UsernameNotFoundException("User not found");
-        }
-
-        @GetMapping("/test/validation")
-        public void validation(@Valid TestDto dto) {
-            // will never be called
-        }
-    }
-
-    static class TestDto {
-        @NotBlank
-        public String name;
+        assertEquals(400, response.getStatusCode().value());
+        assertEquals("must not be null", response.getBody().get("field1"));
     }
 }

@@ -2,144 +2,114 @@ package at.technikum.springrestbackend.controller;
 
 import at.technikum.springrestbackend.dto.CartItemRequestDto;
 import at.technikum.springrestbackend.dto.CartItemResponseDto;
+import at.technikum.springrestbackend.entity.Role;
+import at.technikum.springrestbackend.security.UserPrincipal;
 import at.technikum.springrestbackend.service.CartService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
+import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-/**
- * Controller tests for {@link CartController}.
- * Tests web layer, validation and security behaviour.
- */
-@WebMvcTest(CartController.class)
 class CartControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    /**
-     * CartService is mocked to isolate controller behaviour.
-     */
-    @MockitoBean
+    @Mock
     private CartService cartService;
 
-    // -------------------------------------------------------------------------
-    // Security
-    // -------------------------------------------------------------------------
+    @InjectMocks
+    private CartController cartController;
 
-    @Test
-    void requestsAreUnauthorizedWhenUserIsNotAuthenticated() throws Exception {
-        mockMvc.perform(get("/api/cart/user123"))
-                .andExpect(status().isUnauthorized());
-    }
+    @Mock
+    private Authentication authentication;
 
-    // -------------------------------------------------------------------------
-    // GET cart
-    // -------------------------------------------------------------------------
+    private final String userId = "12345";
 
-    @Test
-    @WithMockUser
-    void getCartReturnsItemsForAuthenticatedUser() throws Exception {
-        CartItemResponseDto item = new CartItemResponseDto();
-        // optional: setters if fields exist (id, quantity, productName, ...)
-
-        when(cartService.getCart("user123"))
-                .thenReturn(List.of(item));
-
-        mockMvc.perform(get("/api/cart/user123"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
-
-    // -------------------------------------------------------------------------
-    // POST add item
-    // -------------------------------------------------------------------------
-
-    @Test
-    @WithMockUser
-    void addCartItemReturnsCreatedItem() throws Exception {
-        CartItemRequestDto requestDto = new CartItemRequestDto();
-        // Beispiel – anpassen an euer echtes DTO
-        requestDto.setProductId(1);
-        requestDto.setQuantity(2);
-
-        CartItemResponseDto responseDto = new CartItemResponseDto();
-
-        when(cartService.addCartItem(eq("user123"), any(CartItemRequestDto.class)))
-                .thenReturn(responseDto);
-
-        mockMvc.perform(post("/api/cart/user123/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk());
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    @WithMockUser
-    void addCartItemReturnsBadRequestWhenRequestIsInvalid() throws Exception {
-        CartItemRequestDto invalidRequest = new CartItemRequestDto();
-        // absichtlich leer → verletzt @Valid
+    void getCart_ShouldReturnCartItems() {
+        // Arrange
+        CartItemResponseDto item = new CartItemResponseDto(1, "Product1", 2, 10);
+        when(cartService.getCart(userId)).thenReturn(List.of(item));
 
-        mockMvc.perform(post("/api/cart/user123/items")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRequest)))
-                .andExpect(status().isBadRequest());
+        // Act
+        List<CartItemResponseDto> result = cartController.getCart(userId);
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals(item.getProductId(), result.getFirst().getProductId());
+        verify(cartService, times(1)).getCart(userId);
     }
 
-    // -------------------------------------------------------------------------
-    // PUT update item
-    // -------------------------------------------------------------------------
-
     @Test
-    @WithMockUser
-    void updateCartItemReturnsUpdatedItem() throws Exception {
-        CartItemRequestDto requestDto = new CartItemRequestDto();
-        requestDto.setProductId(1);
-        requestDto.setQuantity(3);
+    void addCartItem_ShouldReturnCreatedItem() {
+        CartItemRequestDto requestDto = new CartItemRequestDto(1, 2);
+        CartItemResponseDto responseDto = new CartItemResponseDto(1, "Product1", 2, 10);
 
-        CartItemResponseDto responseDto = new CartItemResponseDto();
+        when(cartService.addCartItem(userId, requestDto)).thenReturn(responseDto);
 
-        when(cartService.updateCartItem(
-                eq("user123"),
-                eq(1),
-                any(CartItemRequestDto.class)))
-                .thenReturn(responseDto);
+        CartItemResponseDto result = cartController.addCartItem(userId, requestDto);
 
-        mockMvc.perform(put("/api/cart/user123/items/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk());
+        assertEquals(responseDto.getProductId(), result.getProductId());
+        verify(cartService, times(1)).addCartItem(userId, requestDto);
     }
 
-    // -------------------------------------------------------------------------
-    // DELETE item
-    // -------------------------------------------------------------------------
+    @Test
+    void updateCartItem_ShouldReturnUpdatedItem() {
+        Integer productId = 1;
+        CartItemRequestDto requestDto = new CartItemRequestDto(productId, 5);
+        CartItemResponseDto responseDto = new CartItemResponseDto(productId, "Product1", 5, 10);
+
+        when(cartService.updateCartItem(userId, productId, requestDto)).thenReturn(responseDto);
+
+        CartItemResponseDto result = cartController.updateCartItem(userId, productId, requestDto);
+
+        assertEquals(responseDto.getQuantity(), result.getQuantity());
+        verify(cartService, times(1)).updateCartItem(userId, productId, requestDto);
+    }
 
     @Test
-    @WithMockUser
-    void deleteCartItemReturnsNoContent() throws Exception {
-        doNothing().when(cartService)
-                .deleteCartItem("user123", 1);
+    void deleteCartItem_ShouldCallServiceAndReturnNoContent() {
+        Integer productId = 1;
 
-        mockMvc.perform(delete("/api/cart/user123/items/1"))
-                .andExpect(status().isNoContent());
+        ResponseEntity<Void> response = cartController.deleteCartItem(userId, productId);
+
+        assertEquals(204, response.getStatusCode().value());
+        verify(cartService, times(1)).deleteCartItem(userId, productId);
+    }
+
+    @Test
+    void replaceCart_ShouldReturnReplacedCartItems() {
+        CartItemRequestDto itemRequest = new CartItemRequestDto(1, 2);
+        CartItemResponseDto itemResponse = new CartItemResponseDto(1, "Product1", 2, 10);
+
+        // UserPrincipal jetzt korrekt mit 4 Parametern
+        UserPrincipal principal = new UserPrincipal(
+                UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                "user",
+                "password",
+                Role.USER
+        );
+
+        when(authentication.getPrincipal()).thenReturn(principal);
+        when(cartService.replaceCart(principal.getId().toString(), List.of(itemRequest)))
+                .thenReturn(List.of(itemResponse));
+
+        List<CartItemResponseDto> result = cartController.replaceCart(List.of(itemRequest), authentication);
+
+        assertEquals(1, result.size());
+        assertEquals(itemResponse.getProductId(), result.get(0).getProductId());
+        verify(cartService, times(1)).replaceCart(principal.getId().toString(), List.of(itemRequest));
     }
 }

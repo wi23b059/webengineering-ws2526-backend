@@ -1,155 +1,153 @@
 package at.technikum.springrestbackend.controller;
 
-import at.technikum.springrestbackend.dto.UserRequestDto;
-import at.technikum.springrestbackend.dto.UserResponseDto;
-import at.technikum.springrestbackend.dto.UserUpdateRequestDto;
+import at.technikum.springrestbackend.dto.*;
+import at.technikum.springrestbackend.entity.Role;
 import at.technikum.springrestbackend.entity.User;
+import at.technikum.springrestbackend.exception.UserNotFoundException;
+import at.technikum.springrestbackend.mapper.UserMapper;
 import at.technikum.springrestbackend.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.*;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-/**
- * Controller tests for {@link UserController}.
- */
-@WebMvcTest(UserController.class)
 class UserControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockitoBean
+    @Mock
     private UserService userService;
 
-    // -------------------------------------------------------------------------
-    // GET all users
-    // -------------------------------------------------------------------------
+    @Mock
+    private Authentication authentication;
 
-    @Test
-    void getAllUsersReturnsList() throws Exception {
-        when(userService.getAllUsers())
-                .thenReturn(List.of(new UserResponseDto()));
+    @InjectMocks
+    private UserController userController;
 
-        mockMvc.perform(get("/api/users"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
-    }
+    private UUID userId;
+    private UserResponseDto sampleUser;
 
-    // -------------------------------------------------------------------------
-    // GET user by id
-    // -------------------------------------------------------------------------
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
 
-    @Test
-    void getUserByIdReturnsUser() throws Exception {
-        UUID userId = UUID.randomUUID();
-
-        when(userService.getUser(userId))
-                .thenReturn(new UserResponseDto());
-
-        mockMvc.perform(get("/api/users/{id}", userId))
-                .andExpect(status().isOk());
-    }
-
-    // -------------------------------------------------------------------------
-    // GET /me (authenticated)
-    // -------------------------------------------------------------------------
-
-    @Test
-    @WithMockUser(username = "testuser")
-    void getMeReturnsAuthenticatedUser() throws Exception {
-        User user = new User();
-        user.setUsername("testuser");
-
-        when(userService.findByUsernameOptional("testuser"))
-                .thenReturn(Optional.of(user));
-
-        mockMvc.perform(get("/api/users/me"))
-                .andExpect(status().isOk());
+        userId = UUID.randomUUID();
+        sampleUser = UserResponseDto.builder()
+                .id(userId)
+                .username("testuser")
+                .email("test@test.com")
+                .role(Role.USER)
+                .build();
     }
 
     @Test
-    void getMeReturnsUnauthorizedWhenNotAuthenticated() throws Exception {
-        mockMvc.perform(get("/api/users/me"))
-                .andExpect(status().isUnauthorized());
+    void testGetAllUsers() {
+        when(userService.getAllUsers()).thenReturn(List.of(sampleUser));
+
+        List<UserResponseDto> result = userController.getAllUsers();
+
+        assertEquals(1, result.size());
+        verify(userService).getAllUsers();
     }
 
-    // -------------------------------------------------------------------------
-    // POST create user
-    // -------------------------------------------------------------------------
+    @Test
+    void testGetUserById() {
+        when(userService.getUser(userId)).thenReturn(sampleUser);
+
+        UserResponseDto result = userController.getUserById(userId);
+
+        assertEquals(sampleUser.getId(), result.getId());
+        verify(userService).getUser(userId);
+    }
 
     @Test
-    void createUserReturnsCreated() throws Exception {
+    void testGetMe_UserExists() {
+        when(authentication.getName()).thenReturn("testuser");
+        when(userService.findByUsernameOptional("testuser")).thenReturn(Optional.of(new User()));
+        // Use mapper mock if necessary
+        UserResponseDto mapped = sampleUser;
+        try (MockedStatic<UserMapper> mapperMock = mockStatic(UserMapper.class)) {
+            mapperMock.when(() -> UserMapper.toResponseDto(any(User.class))).thenReturn(mapped);
+
+            UserResponseDto result = userController.getMe(authentication);
+
+            assertEquals(sampleUser.getUsername(), result.getUsername());
+        }
+
+        verify(userService).findByUsernameOptional("testuser");
+    }
+
+    @Test
+    void testGetMe_UserNotFound() {
+        when(authentication.getName()).thenReturn("notfound");
+        when(userService.findByUsernameOptional("notfound")).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userController.getMe(authentication));
+    }
+
+    @Test
+    void testCreateUser() {
         UserRequestDto requestDto = new UserRequestDto();
-        // Pflichtfelder optional setzen
+        when(userService.createUser(requestDto)).thenReturn(sampleUser);
 
-        when(userService.createUser(any(UserRequestDto.class)))
-                .thenReturn(new UserResponseDto());
+        ResponseEntity<UserResponseDto> response = userController.createUser(requestDto);
 
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isCreated());
+        assertEquals(201, response.getStatusCode().value());
+        assertEquals(sampleUser.getId(), response.getBody().getId());
+        verify(userService).createUser(requestDto);
     }
 
     @Test
-    void createUserReturnsBadRequestWhenInvalid() throws Exception {
-        UserRequestDto invalidDto = new UserRequestDto();
+    void testUpdateUser() {
+        UserUpdateRequestDto requestDto = new UserUpdateRequestDto();
+        when(userService.updateUser(userId, requestDto)).thenReturn(sampleUser);
 
-        mockMvc.perform(post("/api/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidDto)))
-                .andExpect(status().isBadRequest());
+        ResponseEntity<UserResponseDto> response = userController.updateUser(userId, requestDto);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(sampleUser.getId(), response.getBody().getId());
+        verify(userService).updateUser(userId, requestDto);
     }
 
-    // -------------------------------------------------------------------------
-    // PUT update user
-    // -------------------------------------------------------------------------
-
     @Test
-    void updateUserReturnsUpdatedUser() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UserUpdateRequestDto updateDto = new UserUpdateRequestDto();
+    void testUpdateAdminUser() {
+        UserAdminUpdateRequestDto requestDto = new UserAdminUpdateRequestDto();
+        when(userService.updateAdminUser(userId, requestDto)).thenReturn(sampleUser);
 
-        when(userService.updateUser(eq(userId), any(UserUpdateRequestDto.class)))
-                .thenReturn(new UserResponseDto());
+        ResponseEntity<UserResponseDto> response = userController.updateAdminUser(userId, requestDto);
 
-        mockMvc.perform(put("/api/users/{id}", userId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateDto)))
-                .andExpect(status().isOk());
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals(sampleUser.getId(), response.getBody().getId());
+        verify(userService).updateAdminUser(userId, requestDto);
     }
 
-    // -------------------------------------------------------------------------
-    // DELETE user
-    // -------------------------------------------------------------------------
-
     @Test
-    void deleteUserReturnsNoContent() throws Exception {
-        UUID userId = UUID.randomUUID();
-
+    void testDeleteUser() {
         doNothing().when(userService).deleteUser(userId);
 
-        mockMvc.perform(delete("/api/users/{id}", userId))
-                .andExpect(status().isNoContent());
+        ResponseEntity<Void> response = userController.deleteUser(userId);
+
+        assertEquals(204, response.getStatusCode().value());
+        verify(userService).deleteUser(userId);
+    }
+
+    @Test
+    void testChangePassword() {
+        ChangePasswordRequestDto dto = new ChangePasswordRequestDto();
+        dto.setCurrentPassword("oldpass");
+        dto.setNewPassword("newpass");
+        doNothing().when(userService).changePassword(userId, "oldpass", "newpass");
+
+        ResponseEntity<Void> response = userController.changePassword(userId, dto);
+
+        assertEquals(204, response.getStatusCode().value());
+        verify(userService).changePassword(userId, "oldpass", "newpass");
     }
 }

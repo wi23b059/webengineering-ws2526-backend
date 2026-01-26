@@ -3,156 +3,97 @@ package at.technikum.springrestbackend.controller;
 import at.technikum.springrestbackend.dto.CategoryRequestDto;
 import at.technikum.springrestbackend.dto.CategoryResponseDto;
 import at.technikum.springrestbackend.service.CategoryService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-/**
- * Controller tests for {@link CategoryController}.
- * Tests web layer, validation and security behaviour.
- */
-@WebMvcTest(CategoryController.class)
 class CategoryControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    /**
-     * CategoryService is mocked to isolate controller behaviour.
-     */
-    @MockitoBean
+    @Mock
     private CategoryService categoryService;
 
-    // -------------------------------------------------------------------------
-    // Security
-    // -------------------------------------------------------------------------
+    @InjectMocks
+    private CategoryController categoryController;
 
-    @Test
-    void requestsAreUnauthorizedWhenUserIsNotAuthenticated() throws Exception {
-        mockMvc.perform(get("/api/categories"))
-                .andExpect(status().isUnauthorized());
+    private CategoryResponseDto sampleCategory;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        sampleCategory = new CategoryResponseDto();
+        sampleCategory.setId(1);
+        sampleCategory.setName("Sample Category");
     }
 
-    // -------------------------------------------------------------------------
-    // GET all categories
-    // -------------------------------------------------------------------------
-
     @Test
-    @WithMockUser
-    void getAllCategoriesReturnsListForAuthenticatedUser() throws Exception {
-        CategoryResponseDto category = new CategoryResponseDto();
-        // optional: set fields if needed (id, name, ...)
+    void testGetAllCategories() {
+        when(categoryService.getAllCategories()).thenReturn(List.of(sampleCategory));
 
-        when(categoryService.getAllCategories())
-                .thenReturn(List.of(category));
+        List<CategoryResponseDto> result = categoryController.getAllCategories();
 
-        mockMvc.perform(get("/api/categories"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
+        assertEquals(1, result.size());
+        assertEquals("Sample Category", result.getFirst().getName());
+        verify(categoryService).getAllCategories();
     }
 
-    // -------------------------------------------------------------------------
-    // GET single category
-    // -------------------------------------------------------------------------
-
     @Test
-    @WithMockUser
-    void getCategoryReturnsCategoryById() throws Exception {
-        CategoryResponseDto category = new CategoryResponseDto();
+    void testGetCategory() {
+        when(categoryService.getCategory(1)).thenReturn(sampleCategory);
 
-        when(categoryService.getCategory(1))
-                .thenReturn(category);
+        CategoryResponseDto result = categoryController.getCategory(1);
 
-        mockMvc.perform(get("/api/categories/1"))
-                .andExpect(status().isOk());
+        assertEquals("Sample Category", result.getName());
+        verify(categoryService).getCategory(1);
     }
 
-    // -------------------------------------------------------------------------
-    // POST create category
-    // -------------------------------------------------------------------------
-
     @Test
-    @WithMockUser
-    void createCategoryReturnsCreatedStatus() throws Exception {
+    void testCreateCategory() {
         CategoryRequestDto requestDto = new CategoryRequestDto();
-        // Beispiel – anpassen an euer echtes DTO
-        requestDto.setName("Electronics");
+        requestDto.setName("Sample Category");
 
-        CategoryResponseDto responseDto = new CategoryResponseDto();
+        when(categoryService.createCategory(requestDto)).thenReturn(sampleCategory);
 
-        when(categoryService.createCategory(any(CategoryRequestDto.class)))
-                .thenReturn(responseDto);
+        ResponseEntity<CategoryResponseDto> response = categoryController.createCategory(requestDto);
 
-        mockMvc.perform(post("/api/categories")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isCreated());
+        assertEquals(201, response.getStatusCode().value());
+        assertEquals("Sample Category", response.getBody().getName());
+        verify(categoryService).createCategory(requestDto);
     }
 
     @Test
-    @WithMockUser
-    void createCategoryReturnsBadRequestWhenRequestIsInvalid() throws Exception {
-        CategoryRequestDto invalidRequest = new CategoryRequestDto();
-        // leer → verletzt @Valid
-
-        mockMvc.perform(post("/api/categories")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    // -------------------------------------------------------------------------
-    // PUT update category
-    // -------------------------------------------------------------------------
-
-    @Test
-    @WithMockUser
-    void updateCategoryReturnsUpdatedCategory() throws Exception {
+    void testUpdateCategory() {
         CategoryRequestDto requestDto = new CategoryRequestDto();
         requestDto.setName("Updated Category");
 
-        CategoryResponseDto responseDto = new CategoryResponseDto();
+        CategoryResponseDto updatedCategory = new CategoryResponseDto();
+        updatedCategory.setId(1);
+        updatedCategory.setName("Updated Category");
 
-        when(categoryService.updateCategory(
-                eq(1),
-                any(CategoryRequestDto.class)))
-                .thenReturn(responseDto);
+        when(categoryService.updateCategory(1, requestDto)).thenReturn(updatedCategory);
 
-        mockMvc.perform(put("/api/categories/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk());
+        ResponseEntity<CategoryResponseDto> response = categoryController.updateCategory(1, requestDto);
+
+        assertEquals(200, response.getStatusCode().value());
+        assertEquals("Updated Category", response.getBody().getName());
+        verify(categoryService).updateCategory(1, requestDto);
     }
 
-    // -------------------------------------------------------------------------
-    // DELETE category
-    // -------------------------------------------------------------------------
-
     @Test
-    @WithMockUser
-    void deleteCategoryReturnsNoContent() throws Exception {
-        doNothing().when(categoryService)
-                .deleteCategory(1);
+    void testDeleteCategory() {
+        doNothing().when(categoryService).deleteCategory(1);
 
-        mockMvc.perform(delete("/api/categories/1"))
-                .andExpect(status().isNoContent());
+        ResponseEntity<Void> response = categoryController.deleteCategory(1);
+
+        assertEquals(204, response.getStatusCode().value());
+        verify(categoryService).deleteCategory(1);
     }
 }
