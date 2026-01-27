@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.controller;
 
+import at.technikum.springrestbackend.dto.OrderItemRequestDto;
 import at.technikum.springrestbackend.dto.TokenRequestDto;
 import at.technikum.springrestbackend.dto.TokenResponseDto;
 import at.technikum.springrestbackend.service.AuthService;
@@ -11,6 +12,10 @@ import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+
+/**
+ * Unit tests for {@link AuthController}.
+ */
 
 class AuthControllerTest {
 

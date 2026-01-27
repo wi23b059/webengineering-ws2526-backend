@@ -1,5 +1,9 @@
 package at.technikum.springrestbackend.controller;
 
+/**
+ * Unit tests for {@link at.technikum.springrestbackend.controller.ProductController}.
+ */
+
 import at.technikum.springrestbackend.dto.ProductRequestDto;
 import at.technikum.springrestbackend.dto.ProductResponseDto;
 import at.technikum.springrestbackend.service.ProductService;

@@ -1,5 +1,9 @@
 package at.technikum.springrestbackend.config;
 
+/**
+ * Unit tests for {@link at.technikum.springrestbackend.config.MinioConfigTest}.
+ */
+
 import io.minio.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;

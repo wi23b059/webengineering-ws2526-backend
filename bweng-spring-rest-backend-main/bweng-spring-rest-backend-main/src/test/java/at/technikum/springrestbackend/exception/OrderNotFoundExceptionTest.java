@@ -3,6 +3,10 @@ package at.technikum.springrestbackend.exception;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link OrderNotFoundException}.
+ */
+
 class OrderNotFoundExceptionTest {
 
     @Test

@@ -1,5 +1,9 @@
 package at.technikum.springrestbackend.controller;
 
+/**
+ * Unit tests for {@link at.technikum.springrestbackend.controller.CheckoutController}.
+ */
+
 import at.technikum.springrestbackend.dto.CheckoutRequestDto;
 import at.technikum.springrestbackend.dto.OrderResponseDto;
 import at.technikum.springrestbackend.service.CheckoutService;
@@ -27,9 +31,7 @@ class CheckoutControllerTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // Beispielhafte Testdaten
         checkoutRequestDto = new CheckoutRequestDto();
-        // Hier ggf. Items und Order-Teil füllen, wenn benötigt
 
         orderResponseDto = new OrderResponseDto();
         orderResponseDto.setId(1);

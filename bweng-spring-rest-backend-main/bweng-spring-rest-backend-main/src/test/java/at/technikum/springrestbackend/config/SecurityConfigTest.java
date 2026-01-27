@@ -1,5 +1,9 @@
 package at.technikum.springrestbackend.config;
 
+/**
+ * Unit tests for {@link at.technikum.springrestbackend.config.SecurityConfig}.
+ */
+
 import at.technikum.springrestbackend.security.jwt.JwtAuthenticationFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

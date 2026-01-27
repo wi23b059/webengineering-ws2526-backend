@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link Order}.
+ */
+
 class OrderTest {
 
     @Test

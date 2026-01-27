@@ -2,6 +2,7 @@ package at.technikum.springrestbackend.controller;
 
 import at.technikum.springrestbackend.dto.CartItemRequestDto;
 import at.technikum.springrestbackend.dto.CartItemResponseDto;
+import at.technikum.springrestbackend.dto.OrderItemRequestDto;
 import at.technikum.springrestbackend.entity.Role;
 import at.technikum.springrestbackend.security.UserPrincipal;
 import at.technikum.springrestbackend.service.CartService;
@@ -18,6 +19,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+/**
+ * Unit tests for {@link CartController}.
+ */
 
 class CartControllerTest {
 
@@ -94,7 +99,6 @@ class CartControllerTest {
         CartItemRequestDto itemRequest = new CartItemRequestDto(1, 2);
         CartItemResponseDto itemResponse = new CartItemResponseDto(1, "Product1", 2, 10);
 
-        // UserPrincipal jetzt korrekt mit 4 Parametern
         UserPrincipal principal = new UserPrincipal(
                 UUID.fromString("00000000-0000-0000-0000-000000000001"),
                 "user",

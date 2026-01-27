@@ -10,6 +10,10 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link CartRepository}.
+ */
+
 @DataJpaTest
 class CartRepositoryTest {
 

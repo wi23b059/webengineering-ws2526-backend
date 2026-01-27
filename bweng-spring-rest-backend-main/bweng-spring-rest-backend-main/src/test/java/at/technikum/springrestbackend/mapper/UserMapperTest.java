@@ -13,6 +13,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link UserMapper}.
+ */
+
 class UserMapperTest {
 
     @Test

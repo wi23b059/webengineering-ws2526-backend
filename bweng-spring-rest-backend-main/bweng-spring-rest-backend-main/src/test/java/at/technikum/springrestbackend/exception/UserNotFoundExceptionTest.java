@@ -6,6 +6,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link UserNotFoundException}.
+ */
+
 class UserNotFoundExceptionTest {
 
     @Test

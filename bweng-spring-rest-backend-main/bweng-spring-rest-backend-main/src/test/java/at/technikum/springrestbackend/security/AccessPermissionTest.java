@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.security;
 
+import at.technikum.springrestbackend.dto.OrderItemRequestDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -8,12 +9,12 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link AccessPermission}.
+ */
+
 class AccessPermissionTest {
 
-    /**
-     * Simple test implementation of AccessPermission
-     * used only for testing the interface contract.
-     */
     static class TestAccessPermission implements AccessPermission {
 
         @Override

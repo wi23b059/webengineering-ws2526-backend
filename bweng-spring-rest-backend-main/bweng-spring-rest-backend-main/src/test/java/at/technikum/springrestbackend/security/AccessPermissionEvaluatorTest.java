@@ -10,6 +10,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for {@link AccessPermissionEvaluator}.
+ */
+
 class AccessPermissionEvaluatorTest {
 
     /**

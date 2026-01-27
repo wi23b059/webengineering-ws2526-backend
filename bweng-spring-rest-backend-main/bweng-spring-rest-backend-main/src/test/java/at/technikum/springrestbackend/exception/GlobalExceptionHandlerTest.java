@@ -15,6 +15,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link GlobalExceptionHandler}.
+ */
+
 class GlobalExceptionHandlerTest {
 
     private GlobalExceptionHandler exceptionHandler;

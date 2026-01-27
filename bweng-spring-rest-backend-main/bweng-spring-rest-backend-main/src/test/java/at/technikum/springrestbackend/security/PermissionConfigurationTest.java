@@ -9,6 +9,10 @@ import java.lang.reflect.Field;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for {@link PermissionConfiguration}.
+ */
+
 class PermissionConfigurationTest {
 
     @Test
@@ -28,7 +32,7 @@ class PermissionConfigurationTest {
         DefaultMethodSecurityExpressionHandler defaultHandler =
                 (DefaultMethodSecurityExpressionHandler) handler;
 
-        // 🔍 Zugriff auf protected field via Reflection
+        // Zugriff auf protected field via Reflection
         Field field = defaultHandler.getClass()
                 .getSuperclass()
                 .getDeclaredField("permissionEvaluator");

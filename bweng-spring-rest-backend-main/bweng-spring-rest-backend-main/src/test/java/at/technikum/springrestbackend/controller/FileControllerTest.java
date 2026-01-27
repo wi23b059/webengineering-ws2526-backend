@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.controller;
 
+import at.technikum.springrestbackend.dto.OrderItemRequestDto;
 import at.technikum.springrestbackend.service.FileStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,10 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+/**
+ * Unit tests for {@link FileController}.
+ */
 
 class FileControllerTest {
 

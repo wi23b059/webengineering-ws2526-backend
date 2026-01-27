@@ -2,6 +2,7 @@ package at.technikum.springrestbackend.controller;
 
 import at.technikum.springrestbackend.dto.CategoryRequestDto;
 import at.technikum.springrestbackend.dto.CategoryResponseDto;
+import at.technikum.springrestbackend.dto.OrderItemRequestDto;
 import at.technikum.springrestbackend.service.CategoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
+
+/**
+ * Unit tests for {@link CategoryController}.
+ */
 
 class CategoryControllerTest {
 

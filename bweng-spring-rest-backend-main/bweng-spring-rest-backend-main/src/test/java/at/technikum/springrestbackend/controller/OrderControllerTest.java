@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.controller;
 
+import at.technikum.springrestbackend.dto.OrderItemRequestDto;
 import at.technikum.springrestbackend.dto.OrderRequestDto;
 import at.technikum.springrestbackend.dto.OrderResponseDto;
 import at.technikum.springrestbackend.service.OrderService;
@@ -14,6 +15,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+/**
+ * Unit tests for {@link OrderController}.
+ */
 
 class OrderControllerTest {
 
